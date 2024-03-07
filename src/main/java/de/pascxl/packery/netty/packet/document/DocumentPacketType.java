@@ -36,6 +36,12 @@ public class DocumentPacketType extends PacketType<DocumentPacket> {
     }
 
     @Override
+    public boolean isPacket(Object o)
+    {
+        return build(o) != null;
+    }
+
+    @Override
     public DocumentPacket build(Object object) {
         if (!(object instanceof DocumentPacket documentPacket)) {
             return null;

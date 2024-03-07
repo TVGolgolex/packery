@@ -3,6 +3,7 @@ package de.pascxl.packery.netty.server;
 import de.pascxl.packery.Packery;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
+import lombok.AllArgsConstructor;
 
 import java.lang.reflect.Parameter;
 
@@ -29,7 +30,10 @@ import java.lang.reflect.Parameter;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+@AllArgsConstructor
 public class NettyServerHandler extends SimpleChannelInboundHandler {
+
+    private final NettyServer nettyServer;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

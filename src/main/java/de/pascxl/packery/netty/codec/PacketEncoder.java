@@ -76,18 +76,22 @@ public class PacketEncoder extends MessageToByteEncoder {
             return;
         }
 
+        if (!(msg instanceof DefaultPacket unknown)) {
+            Packery.debug(this.getClass(), "Cannot encode " + msg.getClass().getSimpleName() + " it's not a packet");
+            return;
+        }
+
         this.packetManager.packetTypes()
                 .values()
                 .stream()
-                .filter(packetType -> packetType.validClasses().contains(msg.getClass()))
+                .filter(packetType -> packetType.isPacket(msg))
                 .findFirst()
                 .ifPresentOrElse(packetType -> {
-
                     DefaultPacket defaultPacket = (DefaultPacket) packetType.build(msg);
                     byteBuffer.writeInt(packetType.typeId());
+                    byteBuffer.writeLong(defaultPacket.packetId());
                     defaultPacket.write(byteBuffer);
                     Packery.debug(this.getClass(), "Write Packet " + msg.getClass().getSimpleName());
-
                 }, () -> {
                     Packery.debug(this.getClass(), "Cannot encode " + msg.getClass().getSimpleName());
                 });

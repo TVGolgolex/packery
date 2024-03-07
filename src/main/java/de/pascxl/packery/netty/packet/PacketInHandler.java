@@ -34,11 +34,5 @@ public abstract class PacketInHandler<P extends DefaultPacket> {
     protected UUID uniqueId;
     protected long seasonId;
 
-    public PacketInHandler(long packetId, UUID uniqueId, long seasonId) {
-        this.packetId = packetId;
-        this.uniqueId = uniqueId;
-        this.seasonId = seasonId;
-    }
-
     public abstract void in(P packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext);
 }

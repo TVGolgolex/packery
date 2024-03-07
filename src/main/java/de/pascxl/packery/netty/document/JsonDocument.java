@@ -38,33 +38,33 @@ import java.util.*;
  */
 @Getter
 @Setter
-public class PDocument {
+public class JsonDocument {
 
     private String name;
     private JsonObject dataCatcher;
     private File file;
 
-    public PDocument(String name) {
+    public JsonDocument(String name) {
         this.name = name;
         this.dataCatcher = new JsonObject();
     }
 
-    public PDocument(String name, JsonObject source) {
+    public JsonDocument(String name, JsonObject source) {
         this.name = name;
         this.dataCatcher = source;
     }
 
-    public PDocument(File file, JsonObject jsonObject) {
+    public JsonDocument(File file, JsonObject jsonObject) {
         this.file = file;
         this.dataCatcher = jsonObject;
     }
 
-    public PDocument(String key, String value) {
+    public JsonDocument(String key, String value) {
         this.dataCatcher = new JsonObject();
         this.append(key, value);
     }
 
-    public PDocument append(String key, String value) {
+    public JsonDocument append(String key, String value) {
         if (value == null) {
             return this;
         }
@@ -72,7 +72,7 @@ public class PDocument {
         return this;
     }
 
-    public PDocument append(String key, Number value) {
+    public JsonDocument append(String key, Number value) {
         if (value == null) {
             return this;
         }
@@ -80,7 +80,7 @@ public class PDocument {
         return this;
     }
 
-    public PDocument append(String key, Boolean value) {
+    public JsonDocument append(String key, Boolean value) {
         if (value == null) {
             return this;
         }
@@ -88,7 +88,7 @@ public class PDocument {
         return this;
     }
 
-    public PDocument append(String key, JsonElement value) {
+    public JsonDocument append(String key, JsonElement value) {
         if (value == null) {
             return this;
         }
@@ -97,19 +97,19 @@ public class PDocument {
     }
 
     @Deprecated
-    public PDocument append(String key, Object value) {
+    public JsonDocument append(String key, Object value) {
         if (value == null) {
             return this;
         }
-        if (value instanceof PDocument) {
-            this.append(key, (PDocument) value);
+        if (value instanceof JsonDocument) {
+            this.append(key, (JsonDocument) value);
             return this;
         }
         this.dataCatcher.add(key, Packery.PRETTY_PRINTING_GSON.toJsonTree(value));
         return this;
     }
 
-    public PDocument remove(String key) {
+    public JsonDocument remove(String key) {
         this.dataCatcher.remove(key);
         return this;
     }
@@ -199,11 +199,11 @@ public class PDocument {
         return saveAsConfig(Paths.get(path));
     }
 
-    public PDocument getDocument(String key) {
+    public JsonDocument getDocument(String key) {
         if (!dataCatcher.has(key)) {
             return null;
         }
-        return new PDocument(dataCatcher.get(key).getAsJsonObject());
+        return new JsonDocument(dataCatcher.get(key).getAsJsonObject());
     }
 
     public boolean saveAsConfig(Path path) {
@@ -216,12 +216,12 @@ public class PDocument {
         return false;
     }
 
-    public PDocument(String key, Object value) {
+    public JsonDocument(String key, Object value) {
         this.dataCatcher = new JsonObject();
         this.append(key, value);
     }
 
-    public PDocument append(String key, PDocument value) {
+    public JsonDocument append(String key, JsonDocument value) {
         if (value == null) {
             return this;
         }
@@ -229,69 +229,69 @@ public class PDocument {
         return this;
     }
 
-    public PDocument(String key, Number value) {
+    public JsonDocument(String key, Number value) {
         this.dataCatcher = new JsonObject();
         this.append(key, value);
     }
 
-    public PDocument(PDocument defaults) {
+    public JsonDocument(JsonDocument defaults) {
         this.dataCatcher = defaults.dataCatcher;
     }
 
-    public PDocument(PDocument defaults, String name) {
+    public JsonDocument(JsonDocument defaults, String name) {
         this.dataCatcher = defaults.dataCatcher;
         this.name = name;
     }
 
-    public PDocument() {
+    public JsonDocument() {
         this.dataCatcher = new JsonObject();
     }
 
-    public PDocument(JsonObject source) {
+    public JsonDocument(JsonObject source) {
         this.dataCatcher = source;
     }
 
-    public static PDocument loadDocument(File backend) {
+    public static JsonDocument loadDocument(File backend) {
         return loadDocument(backend.toPath());
     }
 
-    public static PDocument loadDocument(Path backend) {
+    public static JsonDocument loadDocument(Path backend) {
         try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(backend),
                 StandardCharsets.UTF_8); BufferedReader bufferedReader = new BufferedReader(reader)) {
             JsonObject object = JsonParser.parseReader(bufferedReader).getAsJsonObject();
-            return new PDocument(object);
+            return new JsonDocument(object);
         } catch (Exception ex) {
             ex.getStackTrace();
         }
-        return new PDocument();
+        return new JsonDocument();
     }
 
-    public static PDocument $loadDocument(File backend) throws Exception {
+    public static JsonDocument $loadDocument(File backend) throws Exception {
         try {
-            return new PDocument(JsonParser.parseString(Files.readString(backend.toPath())).getAsJsonObject());
+            return new JsonDocument(JsonParser.parseString(Files.readString(backend.toPath())).getAsJsonObject());
         } catch (Exception ex) {
             throw new Exception(ex);
         }
     }
 
-    public static PDocument load(String input) {
+    public static JsonDocument load(String input) {
         try (InputStreamReader reader = new InputStreamReader(new StringBufferInputStream(input), StandardCharsets.UTF_8)) {
-            return new PDocument(JsonParser.parseReader(new BufferedReader(reader)).getAsJsonObject());
+            return new JsonDocument(JsonParser.parseReader(new BufferedReader(reader)).getAsJsonObject());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new PDocument();
+        return new JsonDocument();
     }
 
-    public static PDocument load(JsonObject input) {
-        return new PDocument(input);
+    public static JsonDocument load(JsonObject input) {
+        return new JsonDocument(input);
     }
 
     public JsonObject obj() {
         return dataCatcher;
     }
 
-    public PDocument append(String key, List<String> value) {
+    public JsonDocument append(String key, List<String> value) {
         if (value == null) {
             return this;
         }
@@ -305,7 +305,7 @@ public class PDocument {
         return this;
     }
 
-    public PDocument appendValues(Map<String, Object> values) {
+    public JsonDocument appendValues(Map<String, Object> values) {
         for (Map.Entry<String, Object> valuess : values.entrySet()) {
             append(valuess.getKey(), valuess.getValue());
         }
@@ -327,7 +327,7 @@ public class PDocument {
         return Packery.PRETTY_PRINTING_GSON.fromJson(element, class_);
     }
 
-    public PDocument clear() {
+    public JsonDocument clear() {
         for (String key : keys()) {
             remove(key);
         }
@@ -338,7 +338,7 @@ public class PDocument {
         return this.dataCatcher.size();
     }
 
-    public PDocument loadProperties(Properties properties) {
+    public JsonDocument loadProperties(Properties properties) {
         Enumeration<?> enumeration = properties.propertyNames();
         while (enumeration.hasMoreElements()) {
             Object x = enumeration.nextElement();
@@ -374,7 +374,7 @@ public class PDocument {
         return false;
     }
 
-    public PDocument loadToExistingDocument(File backend) {
+    public JsonDocument loadToExistingDocument(File backend) {
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(backend), StandardCharsets.UTF_8)) {
 
             this.dataCatcher = JsonParser.parseReader(reader).getAsJsonObject();
@@ -383,10 +383,10 @@ public class PDocument {
         } catch (Exception ex) {
             ex.getStackTrace();
         }
-        return new PDocument();
+        return new JsonDocument();
     }
 
-    public PDocument loadToExistingDocument(Path path) {
+    public JsonDocument loadToExistingDocument(Path path) {
         try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8)) {
 
             this.dataCatcher = JsonParser.parseReader(reader).getAsJsonObject();
@@ -394,7 +394,7 @@ public class PDocument {
         } catch (Exception ex) {
             ex.getStackTrace();
         }
-        return new PDocument();
+        return new JsonDocument();
     }
 
     @Override

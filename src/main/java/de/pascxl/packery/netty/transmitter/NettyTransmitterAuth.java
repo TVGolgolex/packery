@@ -39,7 +39,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public class NettyTransmitterAuth extends SimpleChannelInboundHandler<DefaultPacket> implements PacketSender {
+public class NettyTransmitterAuth extends SimpleChannelInboundHandler implements PacketSender {
 
     private final NettyServer nettyServer;
     private final long connected;
@@ -108,15 +108,41 @@ public class NettyTransmitterAuth extends SimpleChannelInboundHandler<DefaultPac
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, DefaultPacket msg) throws Exception {
-        Packery.debug(this.getClass(), "Executed messageReceived");
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception
+    {
+        Packery.debug(this.getClass(), "Executed channelRead");
 
-        if (msg.packetId() != -400) {
+        if (!(msg instanceof DefaultPacket defaultPacket) || defaultPacket.packetId() != -400) {
             Packery.debug(this.getClass(), "Received PacketId but not a AuthPacket");
             return;
         }
 
-        AuthPacket authPacket = (AuthPacket) msg;
-        this.nettyServer.packetManager().call(authPacket, this, ctx, authPacket.authentication());
+        AuthPacket authPacket = (AuthPacket) defaultPacket;
+
+        channel.pipeline().remove("auth=" + channel.remoteAddress().toString());
+        NettyTransmitter transmitter = new NettyTransmitter(authPacket.authentication(), this.nettyServer.packetManager(), System.currentTimeMillis(), channel);
+        this.nettyServer.waitingForAuthentication().removeIf(nettyTransmitterAuth -> nettyTransmitterAuth.channel().remoteAddress().equals(this.channel.remoteAddress()));
+        this.nettyServer.authenticatedTransmitters().add(transmitter);
+        channel.pipeline().addLast("transmitter=" + transmitter.authentication().uniqueId().toString(), transmitter);
+        Packery.debug(this.getClass(), "Registered new Transmitter");
+    }
+
+    @Override
+    protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
+        Packery.debug(this.getClass(), "Executed messageReceived");
+
+        if (!(msg instanceof DefaultPacket defaultPacket) || defaultPacket.packetId() != -400) {
+            Packery.debug(this.getClass(), "Received PacketId but not a AuthPacket");
+            return;
+        }
+
+        AuthPacket authPacket = (AuthPacket) defaultPacket;
+
+        channel.pipeline().remove("auth=" + channel.remoteAddress().toString());
+        NettyTransmitter transmitter = new NettyTransmitter(authPacket.authentication(), this.nettyServer.packetManager(), System.currentTimeMillis(), channel);
+        this.nettyServer.waitingForAuthentication().removeIf(nettyTransmitterAuth -> nettyTransmitterAuth.channel().remoteAddress().equals(this.channel.remoteAddress()));
+        this.nettyServer.authenticatedTransmitters().add(transmitter);
+        channel.pipeline().addLast("transmitter=" + transmitter.authentication().uniqueId().toString(), transmitter);
+        Packery.debug(this.getClass(), "Registered new Transmitter");
     }
 }

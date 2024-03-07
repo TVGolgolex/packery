@@ -1,12 +1,11 @@
 package de.pascxl.packery.netty.buffer;
 
-import de.pascxl.packery.netty.document.PDocument;
+import de.pascxl.packery.netty.document.JsonDocument;
 import de.pascxl.packery.netty.io.CallableDecoder;
 import de.pascxl.packery.netty.io.CallableEncoder;
 import de.pascxl.packery.netty.io.Decoder;
 import de.pascxl.packery.netty.io.Encoder;
 import io.netty5.buffer.Buffer;
-import lombok.Getter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -60,12 +59,12 @@ public record ByteBuffer(Buffer buffer) {
         return this.buffer.readCharSequence(this.buffer.readInt(), StandardCharsets.UTF_8).toString();
     }
 
-    public void writeDocument(PDocument PDocument) {
-        this.writeString(PDocument.convertToJsonString());
+    public void writeDocument(JsonDocument JsonDocument) {
+        this.writeString(JsonDocument.convertToJsonString());
     }
 
-    public PDocument readDocument() {
-        return PDocument.load(readString());
+    public JsonDocument readDocument() {
+        return JsonDocument.load(readString());
     }
 
     public ByteBuffer writeBoolean(Boolean booleanValue) {

@@ -33,6 +33,12 @@ public class AuthPacketType extends PacketType<AuthPacket> {
     }
 
     @Override
+    public boolean isPacket(Object o)
+    {
+        return build(o) != null;
+    }
+
+    @Override
     public AuthPacket build(Object object) {
         if (!(object instanceof AuthPacket authPacket)) {
             return null;

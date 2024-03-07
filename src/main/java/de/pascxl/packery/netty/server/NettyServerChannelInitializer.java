@@ -44,11 +44,16 @@ public class NettyServerChannelInitializer extends ChannelInitializer<Channel> {
             ch.pipeline().addLast(nettyServer.sslContext().newHandler(ch.bufferAllocator()));
         }
 
-        NettyTransmitterAuth nettyTransmitterAuth = new NettyTransmitterAuth(this.nettyServer, System.currentTimeMillis(), this.nettyServer.packetManager(), ch);
+        NettyTransmitterAuth nettyTransmitterAuth = new NettyTransmitterAuth(
+                this.nettyServer,
+                System.currentTimeMillis(),
+                this.nettyServer.packetManager(),
+                ch);
 
         ch.pipeline().addLast(
                         new PacketDecoder(this.nettyServer.packetManager()),
                         new PacketEncoder(this.nettyServer.packetManager()))
-                .addLast("auth", nettyTransmitterAuth);
+//                        new NettyServerHandler(this.nettyServer))
+                .addLast("auth=" + ch.remoteAddress().toString(), nettyTransmitterAuth);
     }
 }

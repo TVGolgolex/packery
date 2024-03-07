@@ -34,6 +34,12 @@ public class FilePacketType extends PacketType<FilePacket> {
     }
 
     @Override
+    public boolean isPacket(Object o)
+    {
+        return build(o) != null;
+    }
+
+    @Override
     public FilePacket build(Object object) {
         if (!(object instanceof FilePacket filePacket)) {
             return null;

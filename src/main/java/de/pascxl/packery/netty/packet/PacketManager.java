@@ -25,6 +25,7 @@ package de.pascxl.packery.netty.packet;
  */
 
 import de.pascxl.packery.Packery;
+import de.pascxl.packery.netty.packet.auth.AuthPacket;
 import de.pascxl.packery.netty.packet.auth.AuthPacketType;
 import de.pascxl.packery.netty.packet.auth.Authentication;
 import de.pascxl.packery.netty.packet.document.DocumentPacketType;
@@ -33,17 +34,18 @@ import de.pascxl.packery.netty.packet.query.QuerySender;
 import io.netty5.channel.ChannelHandlerContext;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Map;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 @Getter
 public class PacketManager {
 
     private final Map<Long, Collection<Class<? extends PacketInHandler<?>>>> packetHandlers = new ConcurrentHashMap<>(0);
     private final Map<Integer, PacketType<?>> packetTypes = new ConcurrentHashMap<>(0);
+    private final Map<Long, Constructor<? extends DefaultPacket>> packetConstructors = new ConcurrentHashMap<>(0);
     private final Collection<Long> allowedPacketIds = new ArrayList<>();
     private final QuerySender querySender;
 
@@ -52,6 +54,7 @@ public class PacketManager {
         this.registerPacketType(new DocumentPacketType(1));
         this.registerPacketType(new FilePacketType(2));
         this.registerPacketType(new AuthPacketType());
+        this.registerPacketConstruction(-400, AuthPacket.class);
     }
 
     public boolean registerPacketType(PacketType<?> type) {
@@ -166,6 +169,38 @@ public class PacketManager {
             collectHandler.in(packet, packetSender, channelHandlerContext);
         }
         return calledCount;
+    }
+
+    /* ========================================================== */
+
+    public boolean registerPacketConstruction(long packetId, Class<? extends DefaultPacket> packet) {
+        List<Constructor<?>> emptyConstructorList = Arrays.stream(packet.getConstructors())
+                .filter(constructor -> constructor.getParameterCount() == 0).toList();
+        if (emptyConstructorList.isEmpty()) {
+            Packery.LOGGER.log(Level.SEVERE, "Packet is missing no-args-constructor");
+            return false;
+        }
+        this.packetConstructors.put(packetId, (Constructor<? extends DefaultPacket>) emptyConstructorList.get(0));
+        return true;
+    }
+
+    public <P extends DefaultPacket> P constructPacket(long packetId) {
+        try {
+            if (!this.packetConstructors.containsKey(packetId)) {
+                return null;
+            }
+
+            Constructor<? extends DefaultPacket> packetConstructor = this.packetConstructors.get(packetId);
+
+            if (packetConstructor == null) {
+                return null;
+            }
+
+            return (P) packetConstructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            Packery.debug(this.getClass(), e.getMessage());
+            return null;
+        }
     }
 
     /* ========================================================== */

@@ -43,6 +43,8 @@ public abstract class PacketType<P> {
         this.validClasses.addAll(Arrays.asList(validClasses));
     }
 
+    public abstract boolean isPacket(Object o);
+
     public abstract P build(Object object);
 
     public abstract P buildEmpty();

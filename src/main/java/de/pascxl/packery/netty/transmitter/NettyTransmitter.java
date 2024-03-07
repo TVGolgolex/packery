@@ -42,7 +42,7 @@ import java.util.logging.Level;
  */
 @Getter
 @Setter
-public class NettyTransmitter extends SimpleChannelInboundHandler implements PacketSender {
+public class NettyTransmitter extends SimpleChannelInboundHandler<DefaultPacket> implements PacketSender {
 
     private final Authentication authentication;
     private final PacketManager packetManager;
@@ -120,12 +120,12 @@ public class NettyTransmitter extends SimpleChannelInboundHandler implements Pac
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, DefaultPacket msg) throws Exception {
         Packery.debug(this.getClass(), "Executed messageReceived");
 
-        if (msg instanceof DefaultPacket defaultPacket) {
+//        if (msg instanceof DefaultPacket defaultPacket) {
             Packery.debug(this.getClass(), "Dispatched " + msg.getClass().getSimpleName());
-            this.packetManager.call(defaultPacket, this, ctx, this.authentication);
-        }
+            this.packetManager.call(msg, this, ctx, this.authentication);
+//        }
     }
 }

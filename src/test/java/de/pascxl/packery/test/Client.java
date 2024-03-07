@@ -28,9 +28,9 @@ import de.pascxl.packery.NettyAddress;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.netty.client.InactiveAction;
 import de.pascxl.packery.netty.client.NettyClient;
-import de.pascxl.packery.netty.document.PDocument;
+import de.pascxl.packery.netty.document.JsonDocument;
 import de.pascxl.packery.netty.packet.auth.Authentication;
-import de.pascxl.packery.netty.packet.document.DocumentPacket;
+import de.pascxl.packery.test.documentpacket.TestDocumentPacket;
 
 import java.util.UUID;
 
@@ -47,9 +47,9 @@ public class Client {
 
         nettyClient.connect(false, () -> {
 
-            DocumentPacket documentPacket = new DocumentPacket(2, new PDocument());
+            TestDocumentPacket documentPacket = new TestDocumentPacket(new JsonDocument());
 
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
                 documentPacket.data().append(UUID.randomUUID().toString(), UUID.randomUUID());
                 documentPacket.data().append(UUID.randomUUID().toString(), "" + UUID.randomUUID() + "xxxx");
                 documentPacket.data().append(UUID.randomUUID().toString(), i);

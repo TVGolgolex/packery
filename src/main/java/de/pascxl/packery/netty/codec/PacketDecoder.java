@@ -48,10 +48,12 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
         String logId = ctx.channel().remoteAddress().toString() + ": ";
 
-        if (in.readableBytes() < 4) {
+/*        if (in.readableBytes() < 4) {
             Packery.debug(this.getClass(), "[" + logId + "]" + "Decode not enough readableBytes(" + in.readableBytes() + ";channel=" + ctx.channel().remoteAddress().toString() + ")");
             return;
-        }
+        }*/
+
+        System.out.println(in.readableBytes());
 
         ByteBuffer byteBuffer = new ByteBuffer(in);
 
@@ -63,12 +65,14 @@ public class PacketDecoder extends ByteToMessageDecoder {
                 .filter(packetType -> packetType.typeId() == packetTypeId)
                 .findFirst()
                 .ifPresentOrElse(packetType -> {
-                    DefaultPacket defaultPacket = (DefaultPacket) packetType.buildEmpty();
-                    defaultPacket.read(byteBuffer);
-                    Packery.debug(this.getClass(), "Read Packet " + defaultPacket.packetId() + "/" + defaultPacket.uniqueId() + "/" + defaultPacket.seasonId());
-                    ctx.fireChannelRead(defaultPacket);
+                    long packetID = byteBuffer.readLong();
+                    System.out.println(packetID);
+                    DefaultPacket packetObject = this.packetManager.constructPacket(packetID);
+                    packetObject.read(byteBuffer);
+                    Packery.debug(this.getClass(), "Read Packet " + packetObject.packetId() + "/" + packetObject.uniqueId() + "/" + packetObject.seasonId());
+                    ctx.fireChannelRead(packetObject);
                 }, () -> {
-                    Packery.debug(this.getClass(), "Cannot decode ");
+                    Packery.debug(this.getClass(), logId + ": Cannot decode ");
                 });
     }
 }

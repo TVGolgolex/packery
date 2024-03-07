@@ -43,10 +43,7 @@ public class AuthPacket extends DefaultPacket {
 
     @Override
     public void readBuffer(ByteBuffer in) {
-        this.authentication = new Authentication(
-                in.readString(),
-                in.readUUID()
-        );
+        this.authentication = new Authentication(in.readString(), in.readUUID());
     }
 
     @Override

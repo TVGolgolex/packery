@@ -24,8 +24,10 @@ package de.pascxl.packery.netty.packet.document;
  * SOFTWARE.
  */
 
+import com.google.gson.reflect.TypeToken;
+import de.pascxl.packery.Packery;
 import de.pascxl.packery.netty.buffer.ByteBuffer;
-import de.pascxl.packery.netty.document.PDocument;
+import de.pascxl.packery.netty.document.JsonDocument;
 import de.pascxl.packery.netty.packet.DefaultPacket;
 import lombok.Getter;
 
@@ -34,26 +36,26 @@ import java.util.UUID;
 @Getter
 public class DocumentPacket extends DefaultPacket {
 
-    protected PDocument data;
+    protected JsonDocument data;
 
     public DocumentPacket() {
     }
 
     public DocumentPacket(long packetId) {
         this.packetId = packetId;
-        this.data = new PDocument();
+        this.data = new JsonDocument();
     }
 
-    public DocumentPacket(PDocument data) {
+    public DocumentPacket(JsonDocument data) {
         this.data = data;
     }
 
-    public DocumentPacket(long packetId, PDocument data) {
+    public DocumentPacket(long packetId, JsonDocument data) {
         this.packetId = packetId;
         this.data = data;
     }
 
-    public DocumentPacket(UUID uniqueId, long packetId, PDocument data) {
+    public DocumentPacket(UUID uniqueId, long packetId, JsonDocument data) {
         this.uniqueId = uniqueId;
         this.packetId = packetId;
         this.data = data;
@@ -61,19 +63,11 @@ public class DocumentPacket extends DefaultPacket {
 
     @Override
     public void readBuffer(ByteBuffer in) {
-        PDocument readDocument = in.readDocument();
-        if (!readDocument.contains("packet_state_x1_empty")) {
-            this.data = readDocument;
-        } else {
-            this.data = new PDocument();
-        }
+        this.data = JsonDocument.load(in.readString());
     }
 
     @Override
     public void writeBuffer(ByteBuffer out) {
-        if (this.data.isEmpty()) {
-            this.data = new PDocument("packet_state_x1_empty", "empty");
-        }
-        out.writeDocument(this.data);
+        out.writeString(data.dataCatcher().toString());
     }
 }

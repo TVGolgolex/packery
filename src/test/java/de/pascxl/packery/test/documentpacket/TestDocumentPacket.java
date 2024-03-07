@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.test.documentpacket;
 
 /*
  * MIT License
@@ -24,31 +24,17 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
+import de.pascxl.packery.netty.document.JsonDocument;
+import de.pascxl.packery.netty.packet.document.DocumentPacket;
 
-import de.pascxl.packery.NettyAddress;
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.netty.server.NettyServer;
-import de.pascxl.packery.test.documentpacket.TestDocumentPacket;
-import de.pascxl.packery.test.documentpacket.TestDocumentPacketInHandler;
+public class TestDocumentPacket extends DocumentPacket {
 
-public class Server {
-
-    public static void main(String[] args) {
-
-        Packery.DEV_MODE = true;
-        NettyServer nettyServer = new NettyServer(new NettyAddress("0.0.0.0", 8558));
-
-        new Thread(() -> {
-            nettyServer.tryConnect(false, new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println("failed");
-                }
-            });
-        }).start();
-
-        nettyServer.packetManager().registerPacketConstruction(5, TestDocumentPacket.class);
-        nettyServer.packetManager().registerPacketHandler(5, TestDocumentPacketInHandler.class);
+    public TestDocumentPacket()
+    {
     }
 
+    public TestDocumentPacket(JsonDocument data)
+    {
+        super(5, data);
+    }
 }
