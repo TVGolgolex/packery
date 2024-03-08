@@ -1,4 +1,13 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.utils;
+
+import io.netty5.channel.*;
+import io.netty5.channel.epoll.Epoll;
+import io.netty5.channel.epoll.EpollHandler;
+import io.netty5.channel.epoll.EpollServerSocketChannel;
+import io.netty5.channel.epoll.EpollSocketChannel;
+import io.netty5.channel.nio.NioHandler;
+import io.netty5.channel.socket.nio.NioServerSocketChannel;
+import io.netty5.channel.socket.nio.NioSocketChannel;
 
 /*
  * MIT License
@@ -23,22 +32,18 @@ package de.pascxl.packery.test;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+public class NettyUtils {
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
-
-public class Server {
-    public static void main(String[] args) {
-
-        Packery.DEV_MODE = true;
-
-        NettyServer nettyServer = new NettyServer();
-
-        nettyServer.connect("0.0.0.0", 27785, false);
-
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
-
+    public static IoHandlerFactory createIoHandlerFactory() {
+        return Epoll.isAvailable() ? EpollHandler.newFactory() : NioHandler.newFactory();
     }
+
+    public static ServerChannelFactory<? extends ServerChannel> createServerChannelFactory() {
+        return Epoll.isAvailable() ? EpollServerSocketChannel::new : NioServerSocketChannel::new;
+    }
+
+    public static ChannelFactory<? extends Channel> createChannelFactory() {
+        return Epoll.isAvailable() ? EpollSocketChannel::new : NioSocketChannel::new;
+    }
+
 }

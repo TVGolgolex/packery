@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.packet.listener;
 
 /*
  * MIT License
@@ -24,36 +24,20 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.client.NettyClient;
-import de.pascxl.packery.network.InactiveAction;
-import de.pascxl.packery.network.NettyIdentity;
-import de.pascxl.packery.packet.document.JsonDocument;
-import de.pascxl.packery.packet.document.JsonPacket;
-import de.pascxl.packery.test.test.TestPacket;
-import de.pascxl.packery.utils.StringUtils;
+import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.sender.PacketSender;
+import io.netty5.channel.ChannelHandlerContext;
+import lombok.Setter;
 
 import java.util.UUID;
 
-public class Client {
-    public static void main(String[] args) {
+@Setter
+public abstract class PacketInListener<T extends PacketBase> {
 
-        Packery.DEV_MODE = true;
+    protected long packetId;
+    protected UUID uniqueId;
+    protected long seasonId;
 
-        NettyClient nettyClient = new NettyClient(new NettyIdentity("test", UUID.randomUUID()), InactiveAction.SHUTDOWN);
+    public abstract void call(T packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext);
 
-        nettyClient.connect("0.0.0.0", 27785, false);
-
-        nettyClient.packetManager().allowPacket(4);
-
-        TestPacket testPacket = new TestPacket(4, new JsonDocument());
-
-        for (int i = 0; i < 30; i++) {
-            testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
-//            jsonPacket.jsonDocument().write(StringUtils.generateRandomString(7), UUID.randomUUID());
-        }
-
-        nettyClient.nettyTransmitter().sendPacketAsync(testPacket);
-
-    }
 }

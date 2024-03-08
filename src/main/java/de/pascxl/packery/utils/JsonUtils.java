@@ -1,4 +1,4 @@
-package de.pascxl.packery.test.documentpacket;
+package de.pascxl.packery.utils;
 
 /*
  * MIT License
@@ -24,22 +24,30 @@ package de.pascxl.packery.test.documentpacket;
  * SOFTWARE.
  */
 
-import com.google.gson.JsonElement;
-import de.pascxl.packery.netty.packet.PacketInHandler;
-import de.pascxl.packery.netty.packet.PacketSender;
-import io.netty5.channel.ChannelHandlerContext;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.util.Map;
+public class JsonUtils {
 
-public class TestDocumentPacketInHandler extends PacketInHandler<TestDocumentPacket> {
-    @Override
-    public void in(TestDocumentPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext)
-    {
+    public static final Gson JSON = new GsonBuilder()
+            .disableHtmlEscaping()
+            .create();
+    public static final Gson PRETTY_JSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .disableHtmlEscaping()
+            .create();
 
-        for (Map.Entry<String, JsonElement> stringJsonElementEntry : packet.data().dataCatcher().entrySet())
-        {
-            System.out.println(stringJsonElementEntry.getKey() + ": " + stringJsonElementEntry.getValue().toString());
-        }
 
+    public static String toJson(Object object) {
+        return JSON.toJson(object);
     }
+
+    public static String toPrettyJson(Object object) {
+        return PRETTY_JSON.toJson(object);
+    }
+
+    public static <T> T fromJson(String string, Class<T> tClass) {
+        return JSON.fromJson(string, tClass);
+    }
+
 }

@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.client;
 
 /*
  * MIT License
@@ -25,35 +25,27 @@ package de.pascxl.packery.test;
  */
 
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.client.NettyClient;
-import de.pascxl.packery.network.InactiveAction;
-import de.pascxl.packery.network.NettyIdentity;
-import de.pascxl.packery.packet.document.JsonDocument;
-import de.pascxl.packery.packet.document.JsonPacket;
-import de.pascxl.packery.test.test.TestPacket;
-import de.pascxl.packery.utils.StringUtils;
+import de.pascxl.packery.network.codec.PacketInDecoder;
+import de.pascxl.packery.network.codec.PacketOutEncoder;
+import io.netty5.channel.Channel;
+import io.netty5.channel.ChannelHandlerContext;
+import io.netty5.channel.ChannelInitializer;
+import lombok.AllArgsConstructor;
 
-import java.util.UUID;
+import java.io.IOException;
+import java.util.logging.Level;
 
-public class Client {
-    public static void main(String[] args) {
+@AllArgsConstructor
+public class NettyClientChannelInitializer extends ChannelInitializer<Channel> {
 
-        Packery.DEV_MODE = true;
+    private final NettyClient client;
 
-        NettyClient nettyClient = new NettyClient(new NettyIdentity("test", UUID.randomUUID()), InactiveAction.SHUTDOWN);
-
-        nettyClient.connect("0.0.0.0", 27785, false);
-
-        nettyClient.packetManager().allowPacket(4);
-
-        TestPacket testPacket = new TestPacket(4, new JsonDocument());
-
-        for (int i = 0; i < 30; i++) {
-            testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
-//            jsonPacket.jsonDocument().write(StringUtils.generateRandomString(7), UUID.randomUUID());
+    @Override
+    protected void initChannel(Channel ch) throws Exception {
+        if (ch == null) {
+            Packery.log(Level.SEVERE, this.getClass(), "Channel is null");
+            return;
         }
-
-        nettyClient.nettyTransmitter().sendPacketAsync(testPacket);
-
+        ch.pipeline().addLast(new PacketInDecoder(this.client.packetManager()), new PacketOutEncoder(this.client.packetManager()), new NettyClientHandler(client));
     }
 }

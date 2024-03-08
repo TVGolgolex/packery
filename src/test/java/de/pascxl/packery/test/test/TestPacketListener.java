@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.test.test;
 
 /*
  * MIT License
@@ -24,21 +24,18 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
+import com.google.gson.JsonElement;
+import de.pascxl.packery.packet.listener.PacketInListener;
+import de.pascxl.packery.packet.sender.PacketSender;
+import io.netty5.channel.ChannelHandlerContext;
 
-public class Server {
-    public static void main(String[] args) {
+import java.util.Map;
 
-        Packery.DEV_MODE = true;
-
-        NettyServer nettyServer = new NettyServer();
-
-        nettyServer.connect("0.0.0.0", 27785, false);
-
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
-
+public class TestPacketListener extends PacketInListener<TestPacket> {
+    @Override
+    public void call(TestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext) {
+        for (Map.Entry<String, JsonElement> stringJsonElementEntry : packet.jsonDocument().jsonObject().entrySet()) {
+            System.out.println(stringJsonElementEntry.getKey() + ": " + stringJsonElementEntry.getValue().toString());
+        }
     }
 }

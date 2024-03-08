@@ -1,4 +1,10 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.utils;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Objects;
 
 /*
  * MIT License
@@ -23,22 +29,21 @@ package de.pascxl.packery.test;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+@Setter
+@Getter
+@AllArgsConstructor
+public class Value<E> {
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
+    private E entry;
 
-public class Server {
-    public static void main(String[] args) {
-
-        Packery.DEV_MODE = true;
-
-        NettyServer nettyServer = new NettyServer();
-
-        nettyServer.connect("0.0.0.0", 27785, false);
-
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
-
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Value<?> value1)) {
+            return false;
+        }
+        return Objects.equals(entry, value1.entry);
     }
 }

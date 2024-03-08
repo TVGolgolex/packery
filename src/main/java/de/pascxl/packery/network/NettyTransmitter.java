@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.network;
 
 /*
  * MIT License
@@ -24,21 +24,38 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
+import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.sender.PacketSender;
+import de.pascxl.packery.utils.ExecutionUtils;
+import io.netty5.channel.Channel;
+import lombok.Getter;
+import lombok.Setter;
 
-public class Server {
-    public static void main(String[] args) {
+@Getter
+public class NettyTransmitter extends PacketSender {
 
-        Packery.DEV_MODE = true;
+    private final NettyIdentity identity;
+    @Setter
+    private Channel channel;
 
-        NettyServer nettyServer = new NettyServer();
+    public NettyTransmitter(NettyIdentity identity, Channel channel) {
+        this.identity = identity;
+        this.channel = channel;
+    }
 
-        nettyServer.connect("0.0.0.0", 27785, false);
+    @Override
+    public <P extends PacketBase> void sendPacketAsync(P packet) {
+        if (!(channel != null && channel.isOpen())) {
+            return;
+        }
+        ExecutionUtils.ASYNC_EXECUTOR.execute(() -> channel.writeAndFlush(packet));
+    }
 
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
-
+    @Override
+    public <P extends PacketBase> void sendPacketSync(P packet) {
+        if (!(channel != null && channel.isOpen())) {
+            return;
+        }
+        ExecutionUtils.DIRECT_EXECUTOR.execute(() -> channel.writeAndFlush(packet));
     }
 }

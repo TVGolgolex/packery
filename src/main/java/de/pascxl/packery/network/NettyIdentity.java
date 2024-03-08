@@ -1,4 +1,6 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.network;
+
+import java.util.UUID;
 
 /*
  * MIT License
@@ -23,22 +25,5 @@ package de.pascxl.packery.test;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
-
-public class Server {
-    public static void main(String[] args) {
-
-        Packery.DEV_MODE = true;
-
-        NettyServer nettyServer = new NettyServer();
-
-        nettyServer.connect("0.0.0.0", 27785, false);
-
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
-
-    }
+public record NettyIdentity(String namespace, UUID uniqueId) {
 }

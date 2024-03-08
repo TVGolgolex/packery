@@ -1,4 +1,4 @@
-package de.pascxl.packery.test.documentpacket;
+package de.pascxl.packery.packet.document;
 
 /*
  * MIT License
@@ -24,17 +24,41 @@ package de.pascxl.packery.test.documentpacket;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.netty.document.JsonDocument;
-import de.pascxl.packery.netty.packet.document.DocumentPacket;
+import com.google.gson.JsonObject;
+import de.pascxl.packery.buffer.ByteBuffer;
+import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.utils.JsonUtils;
+import lombok.Getter;
 
-public class TestDocumentPacket extends DocumentPacket {
+import java.util.UUID;
 
-    public TestDocumentPacket()
-    {
+@Getter
+public class JsonPacket extends PacketBase {
+
+    private JsonDocument jsonDocument;
+
+    public JsonPacket(long packetId) {
+        super(packetId);
+        this.jsonDocument = new JsonDocument();
     }
 
-    public TestDocumentPacket(JsonDocument data)
-    {
-        super(5, data);
+    public JsonPacket(long packetId, JsonDocument jsonDocument) {
+        super(packetId);
+        this.jsonDocument = jsonDocument;
+    }
+
+    public JsonPacket(long packetId, UUID uniqueId, JsonDocument jsonDocument) {
+        super(packetId, uniqueId);
+        this.jsonDocument = jsonDocument;
+    }
+
+    @Override
+    public void write(ByteBuffer out) {
+        out.writeString(this.jsonDocument.jsonObjectToString());
+    }
+
+    @Override
+    public void read(ByteBuffer in) {
+        this.jsonDocument = new JsonDocument(JsonUtils.JSON.fromJson(in.readString(), JsonObject.class));
     }
 }

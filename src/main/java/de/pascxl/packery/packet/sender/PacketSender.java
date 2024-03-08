@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.packet.sender;
 
 /*
  * MIT License
@@ -24,21 +24,12 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
+import de.pascxl.packery.packet.PacketBase;
 
-public class Server {
-    public static void main(String[] args) {
+public abstract class PacketSender {
 
-        Packery.DEV_MODE = true;
+    public abstract <P extends PacketBase> void sendPacketAsync(P packet);
 
-        NettyServer nettyServer = new NettyServer();
+    public abstract <P extends PacketBase> void sendPacketSync(P packet);
 
-        nettyServer.connect("0.0.0.0", 27785, false);
-
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
-
-    }
 }

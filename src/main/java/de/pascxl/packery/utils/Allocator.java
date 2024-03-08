@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.utils;
 
 /*
  * MIT License
@@ -24,21 +24,35 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
+import sun.misc.Unsafe;
 
-public class Server {
-    public static void main(String[] args) {
+public class Allocator {
 
-        Packery.DEV_MODE = true;
+    private static final Unsafe unsafe;
 
-        NettyServer nettyServer = new NettyServer();
+    static {
+        try {
+            var field = Unsafe.class.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            unsafe = (Unsafe) field.get(null);
+        } catch (IllegalAccessException | NoSuchFieldException var1) {
+            throw new RuntimeException(var1);
+        }
+    }
 
-        nettyServer.connect("0.0.0.0", 27785, false);
+    private Allocator() {
+    }
 
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
+    @SuppressWarnings("unchecked")
+    public static <T> T allocate(Class<T> tClass) {
+        try {
+            return createInstance(tClass);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
+    private static <T> T createInstance(Class<T> tClass) throws Exception {
+        return (T) unsafe.allocateInstance(tClass);
     }
 }

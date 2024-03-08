@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.events;
 
 /*
  * MIT License
@@ -24,36 +24,17 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.client.NettyClient;
-import de.pascxl.packery.network.InactiveAction;
+import com.github.golgolex.eventum.events.Event;
 import de.pascxl.packery.network.NettyIdentity;
-import de.pascxl.packery.packet.document.JsonDocument;
-import de.pascxl.packery.packet.document.JsonPacket;
-import de.pascxl.packery.test.test.TestPacket;
-import de.pascxl.packery.utils.StringUtils;
+import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.sender.PacketSender;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import java.util.UUID;
-
-public class Client {
-    public static void main(String[] args) {
-
-        Packery.DEV_MODE = true;
-
-        NettyClient nettyClient = new NettyClient(new NettyIdentity("test", UUID.randomUUID()), InactiveAction.SHUTDOWN);
-
-        nettyClient.connect("0.0.0.0", 27785, false);
-
-        nettyClient.packetManager().allowPacket(4);
-
-        TestPacket testPacket = new TestPacket(4, new JsonDocument());
-
-        for (int i = 0; i < 30; i++) {
-            testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
-//            jsonPacket.jsonDocument().write(StringUtils.generateRandomString(7), UUID.randomUUID());
-        }
-
-        nettyClient.nettyTransmitter().sendPacketAsync(testPacket);
-
-    }
+@Getter
+@AllArgsConstructor
+public class PacketReceiveEvent implements Event {
+    private final PacketSender packetSender;
+    private final NettyIdentity nettyIdentity;
+    private final PacketBase packet;
 }

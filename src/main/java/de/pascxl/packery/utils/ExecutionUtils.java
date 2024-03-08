@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.utils;
 
 /*
  * MIT License
@@ -24,21 +24,13 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
-public class Server {
-    public static void main(String[] args) {
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-        Packery.DEV_MODE = true;
-
-        NettyServer nettyServer = new NettyServer();
-
-        nettyServer.connect("0.0.0.0", 27785, false);
-
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
-
-    }
+public class ExecutionUtils {
+    public static final ListeningExecutorService ASYNC_EXECUTOR = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    public static final Executor DIRECT_EXECUTOR = Runnable::run;
 }
