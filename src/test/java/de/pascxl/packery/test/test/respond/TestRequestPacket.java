@@ -1,9 +1,4 @@
-package de.pascxl.packery.packet.query;
-
-import de.pascxl.packery.packet.PacketBase;
-
-
-import java.util.UUID;
+package de.pascxl.packery.test.test.respond;
 
 /*
  * MIT License
@@ -29,5 +24,31 @@ import java.util.UUID;
  * SOFTWARE.
  */
 
-public record QueryResult<P extends PacketBase>(UUID uniqueId, P resultPacket) {
+import de.pascxl.packery.buffer.ByteBuffer;
+import de.pascxl.packery.packet.request.RequestPacket;
+import lombok.Getter;
+
+@Getter
+public class TestRequestPacket extends RequestPacket {
+
+    private String message;
+
+    public TestRequestPacket(String message)
+    {
+        super(3);
+        this.message = message;
+    }
+
+
+    @Override
+    public void write(ByteBuffer out)
+    {
+        out.writeString(message);
+    }
+
+    @Override
+    public void read(ByteBuffer in)
+    {
+        this.message = in.readString();
+    }
 }

@@ -28,8 +28,9 @@ import com.github.golgolex.eventum.EventManager;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.events.PacketIdAllowEvent;
 import de.pascxl.packery.events.PacketIdDisallowEvent;
-import de.pascxl.packery.packet.listener.PacketInListener;
-import de.pascxl.packery.packet.query.QuerySender;
+import de.pascxl.packery.network.NettyIdentity;
+import de.pascxl.packery.packet.listener.PacketReceiveListener;
+import de.pascxl.packery.packet.request.PacketRequester;
 import de.pascxl.packery.packet.sender.PacketSender;
 import io.netty5.channel.ChannelHandlerContext;
 import lombok.Getter;
@@ -44,15 +45,15 @@ import java.util.logging.Level;
 @Getter
 public class PacketManager {
 
-    private final Map<Long, Collection<Class<? extends PacketInListener<?>>>> packetHandlers = new ConcurrentHashMap<>(0);
+    private final Map<Long, Collection<Class<? extends PacketReceiveListener<?>>>> packetHandlers = new ConcurrentHashMap<>(0);
     private final Collection<Long> allowedPacketIds = new ArrayList<>();
-    private final QuerySender querySender;
+    private final PacketRequester packetRequester;
 
     public PacketManager() {
-        this.querySender = new QuerySender(this);
+        this.packetRequester = new PacketRequester(this);
     }
 
-    public <P extends PacketBase> boolean registerPacketHandler(long packetId, Class<? extends PacketInListener<P>> handler) {
+    public <P extends PacketBase> boolean registerPacketHandler(long packetId, Class<? extends PacketReceiveListener<P>> handler) {
         if (!this.packetHandlers.containsKey(packetId)) {
             this.packetHandlers.put(packetId, new ArrayList<>());
         }
@@ -60,11 +61,11 @@ public class PacketManager {
         return true;
     }
 
-    public <P extends PacketBase> boolean unregisterPacketHandler(long packetId, Class<? extends PacketInListener<P>> handler) {
+    public <P extends PacketBase> boolean unregisterPacketHandler(long packetId, Class<? extends PacketReceiveListener<P>> handler) {
         if (!this.packetHandlers.containsKey(packetId)) {
             return false;
         }
-        Collection<Class<? extends PacketInListener<?>>> handlers = this.packetHandlers.get(packetId);
+        Collection<Class<? extends PacketReceiveListener<?>>> handlers = this.packetHandlers.get(packetId);
         handlers.remove(handler);
         if (handlers.isEmpty()) {
             this.packetHandlers.remove(packetId);
@@ -72,12 +73,12 @@ public class PacketManager {
         return true;
     }
 
-    public <P extends PacketBase> Collection<PacketInListener<P>> collectHandlers(P packet) {
-        Collection<PacketInListener<P>> handlers = new LinkedList<>();
+    public <P extends PacketBase> Collection<PacketReceiveListener<P>> collectHandlers(P packet) {
+        Collection<PacketReceiveListener<P>> handlers = new LinkedList<>();
         if (packetHandlers.containsKey(packet.packetId())) {
-            for (Class<? extends PacketInListener<?>> aClass : packetHandlers.get(packet.packetId())) {
+            for (Class<? extends PacketReceiveListener<?>> aClass : packetHandlers.get(packet.packetId())) {
                 try {
-                    handlers.add((PacketInListener<P>) aClass.newInstance());
+                    handlers.add((PacketReceiveListener<P>) aClass.newInstance());
                 } catch (InstantiationException | IllegalAccessException | ClassCastException exception) {
                     Packery.log(Level.SEVERE, this.getClass(), exception.getMessage());
                 }
@@ -88,7 +89,7 @@ public class PacketManager {
 
     public <P extends PacketBase> int callHandlers(P packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext) {
         int calledCount = 0;
-        for (PacketInListener<P> listener : this.collectHandlers(packet)) {
+        for (PacketReceiveListener<P> listener : this.collectHandlers(packet)) {
             calledCount++;
             if (packet.uniqueId() != null) {
                 listener.uniqueId(packet.uniqueId());
@@ -110,6 +111,10 @@ public class PacketManager {
             return false;
         }
 
+        if (packetBase.uniqueId() != null && this.packetRequester.waiting().containsKey(packetBase.uniqueId())) {
+            return true;
+        }
+
         return packetId == -400 || packetId == -410 || this.allowedPacketIds.contains(packetId);
     }
 
@@ -125,6 +130,14 @@ public class PacketManager {
             this.allowedPacketIds.remove(id);
             EventManager.call(new PacketIdDisallowEvent(id));
         }
+    }
+
+    public <P extends PacketBase> void call(P packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext, NettyIdentity authentication) {
+        Packery.debug(Level.INFO, this.getClass(), "Received Packet [id=" + packet.packetId() + ";uuid=" + packet.uniqueId() + ";seasonId=" + packet.seasonId() + "] from " + authentication.namespace() + "#" + authentication.uniqueId());
+        if (packet.uniqueId() != null && this.packetRequester.waiting().containsKey(packet.uniqueId())) {
+            this.packetRequester.dispatch(packet);
+        }
+        callHandlers(packet, packetSender, channelHandlerContext);
     }
 
 }

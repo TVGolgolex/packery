@@ -40,7 +40,8 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> 
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, PacketBase msg) throws Exception {
-
+        Packery.debug(Level.INFO, this.getClass(), "messageReceived: " + msg.getClass().getSimpleName());
+        this.client.packetManager.call(msg, this.client.nettyTransmitter(), ctx, this.client.account());
     }
 
     @Override
@@ -54,14 +55,16 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> 
             ctx.channel().close();
             switch (client.inactiveAction()) {
                 case SHUTDOWN -> System.exit(0);
+                case RETRY -> {
+
+                }
             }
         }
     }
 
     @Override
     public void channelExceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (!(cause instanceof IOException))
-        {
+        if (!(cause instanceof IOException)) {
             Packery.debug(Level.SEVERE, this.getClass(), cause.getMessage());
         }
     }

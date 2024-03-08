@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.listener;
+package de.pascxl.packery.events.server;
 
 /*
  * MIT License
@@ -24,20 +24,13 @@ package de.pascxl.packery.packet.listener;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.packet.sender.PacketSender;
-import io.netty5.channel.ChannelHandlerContext;
-import lombok.Setter;
+import com.github.golgolex.eventum.events.Event;
+import io.netty5.channel.Channel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import java.util.UUID;
-
-@Setter
-public abstract class PacketInListener<T extends PacketBase> {
-
-    protected long packetId;
-    protected UUID uniqueId;
-    protected long seasonId;
-
-    public abstract void call(T packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext);
-
+@Getter
+@AllArgsConstructor
+public class UnauthenticatedChannelInit implements Event {
+    private final Channel channel;
 }

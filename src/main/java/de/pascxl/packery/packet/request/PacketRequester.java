@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.query;
+package de.pascxl.packery.packet.request;
 
 /*
  * MIT License
@@ -24,7 +24,6 @@ package de.pascxl.packery.packet.query;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.PacketManager;
@@ -33,26 +32,22 @@ import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
 
 @Getter
-public class QuerySender {
+public class PacketRequester {
 
     private final PacketManager packetManager;
-    private final Map<UUID, Value<QueryResult<?>>> waiting = new ConcurrentHashMap<>(0);
-    private final Queue<?> queue = new ConcurrentLinkedQueue<>();
-    private final Collection<Long> manuellRegisteredIds = new ArrayList<>();
+    private final Map<UUID, Value<Respond<?>>> waiting = new ConcurrentHashMap<>(0);
 
-    public QuerySender(PacketManager packetManager) {
+    public PacketRequester(PacketManager packetManager) {
         this.packetManager = packetManager;
     }
 
-    public <P extends PacketBase, PR extends PacketBase> QueryResult<PR> query(P packet, NettyTransmitter nettyTransmitter) {
+    public <P extends RequestPacket, PR extends PacketBase> RespondPacket query(P packet, NettyTransmitter nettyTransmitter) {
         UUID queryUUID = UUID.randomUUID();
         packet.uniqueId(queryUUID);
 
-        Value<QueryResult<?>> handled = new Value<>(null);
+        Value<Respond<?>> handled = new Value<>(null);
         waiting.put(queryUUID, handled);
         nettyTransmitter.sendPacketAsync(packet);
 
@@ -66,22 +61,22 @@ public class QuerySender {
         }
 
         if (i >= 4999) {
-            waiting.get(queryUUID).entry(new QueryResult<>(queryUUID, null));
+            waiting.get(queryUUID).entry(new Respond<>(queryUUID, null));
         }
 
-        Value<QueryResult<?>> resultValue = waiting.get(queryUUID);
+        Value<Respond<?>> resultValue = waiting.get(queryUUID);
         waiting.remove(queryUUID);
-        return resultValue != null && resultValue.entry() != null ? castQueryResult(resultValue) : null;
+        return resultValue != null && resultValue.entry() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null;
     }
 
     @SuppressWarnings("unchecked")
-    private <PR extends PacketBase> QueryResult<PR> castQueryResult(Value<QueryResult<?>> resultValue) {
-        return (QueryResult<PR>) resultValue.entry();
+    private <PR extends PacketBase> Respond<PR> castResult(Value<Respond<?>> resultValue) {
+        return (Respond<PR>) resultValue.entry();
     }
 
     public void dispatch(PacketBase packet) {
-        QueryResult<PacketBase> queryResult = new QueryResult<>(packet.uniqueId(), packet);
-        Value<QueryResult<?>> waitingQuery = waiting.get(packet.uniqueId());
-        waitingQuery.entry(queryResult);
+        Respond<PacketBase> respond = new Respond<>(packet.uniqueId(), packet);
+        Value<Respond<?>> waitingQuery = waiting.get(packet.uniqueId());
+        waitingQuery.entry(respond);
     }
 }

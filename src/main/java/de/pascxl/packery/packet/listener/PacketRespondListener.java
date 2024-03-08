@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.sender;
+package de.pascxl.packery.packet.listener;
 
 /*
  * MIT License
@@ -25,16 +25,19 @@ package de.pascxl.packery.packet.sender;
  */
 
 import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.request.RequestPacket;
+import de.pascxl.packery.packet.request.RespondPacket;
+import de.pascxl.packery.packet.sender.PacketSender;
+import lombok.NonNull;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+public abstract class PacketRespondListener<T extends RequestPacket> extends PacketReceiveListener<T> {
 
-public abstract class PacketSender {
+    public <R extends PacketBase> RespondPacket buildRespond(@NonNull R packet) {
+        return new RespondPacket(this.packetId, this.uniqueId, packet);
+    }
 
-    private final Queue<?> queue = new ConcurrentLinkedQueue<>();
-
-    public abstract <P extends PacketBase> void sendPacketAsync(P packet);
-
-    public abstract <P extends PacketBase> void sendPacketSync(P packet);
+    public void respond(@NonNull RespondPacket respondPacket, @NonNull PacketSender packetSender) {
+        packetSender.sendPacketSync(respondPacket);
+    }
 
 }

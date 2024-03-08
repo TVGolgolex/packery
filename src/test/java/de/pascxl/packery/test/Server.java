@@ -27,6 +27,7 @@ package de.pascxl.packery.test;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.server.NettyServer;
 import de.pascxl.packery.test.test.TestPacketListener;
+import de.pascxl.packery.test.test.respond.TestRequestPacketListener;
 
 public class Server {
     public static void main(String[] args) {
@@ -39,6 +40,9 @@ public class Server {
 
         nettyServer.packetManager().allowPacket(4);
         nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
+
+        nettyServer.packetManager().allowPacket(3);
+        nettyServer.packetManager().registerPacketHandler(3, TestRequestPacketListener.class);
 
     }
 }

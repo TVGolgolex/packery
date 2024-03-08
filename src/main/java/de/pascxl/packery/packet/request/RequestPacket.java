@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.sender;
+package de.pascxl.packery.packet.request;
 
 /*
  * MIT License
@@ -26,15 +26,11 @@ package de.pascxl.packery.packet.sender;
 
 import de.pascxl.packery.packet.PacketBase;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+public abstract class RequestPacket extends PacketBase {
 
-public abstract class PacketSender {
-
-    private final Queue<?> queue = new ConcurrentLinkedQueue<>();
-
-    public abstract <P extends PacketBase> void sendPacketAsync(P packet);
-
-    public abstract <P extends PacketBase> void sendPacketSync(P packet);
+    public RequestPacket(long packetId)
+    {
+        super(packetId);
+    }
 
 }

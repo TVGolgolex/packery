@@ -71,7 +71,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
                 .filter(nettyTransmitter -> nettyTransmitter.channel().remoteAddress().equals(ctx.channel().remoteAddress()))
                 .findFirst()
                 .ifPresentOrElse(nettyTransmitter -> {
-                    this.server.packetManager().callHandlers(msg, nettyTransmitter, ctx);
+                    this.server.packetManager.call(msg, nettyTransmitter, ctx, nettyTransmitter.identity());
                 }, () -> {
                     Packery.debug(Level.SEVERE, this.getClass(), "No PacketSender found. Packet: " + msg.getClass().getSimpleName());
                 });

@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.sender;
+package de.pascxl.packery.packet.listener;
 
 /*
  * MIT License
@@ -25,16 +25,19 @@ package de.pascxl.packery.packet.sender;
  */
 
 import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.sender.PacketSender;
+import io.netty5.channel.ChannelHandlerContext;
+import lombok.Setter;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.UUID;
 
-public abstract class PacketSender {
+@Setter
+public abstract class PacketReceiveListener<T extends PacketBase> {
 
-    private final Queue<?> queue = new ConcurrentLinkedQueue<>();
+    protected long packetId;
+    protected UUID uniqueId;
+    protected long seasonId;
 
-    public abstract <P extends PacketBase> void sendPacketAsync(P packet);
-
-    public abstract <P extends PacketBase> void sendPacketSync(P packet);
+    public abstract void call(T packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext);
 
 }

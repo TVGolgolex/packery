@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.sender;
+package de.pascxl.packery.packet.request;
 
 /*
  * MIT License
@@ -24,17 +24,49 @@ package de.pascxl.packery.packet.sender;
  * SOFTWARE.
  */
 
+import de.pascxl.packery.Packery;
+import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.utils.Allocator;
+import lombok.Getter;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.UUID;
+import java.util.logging.Level;
 
-public abstract class PacketSender {
+@Getter
+public class RespondPacket extends PacketBase {
 
-    private final Queue<?> queue = new ConcurrentLinkedQueue<>();
+    private PacketBase packet;
 
-    public abstract <P extends PacketBase> void sendPacketAsync(P packet);
+    public RespondPacket(long packetId, UUID uniqueId, PacketBase packet)
+    {
+        super(packetId, uniqueId);
+        this.packet = packet;
+    }
 
-    public abstract <P extends PacketBase> void sendPacketSync(P packet);
+    @Override
+    public void write(ByteBuffer out)
+    {
+        out.writeString(packet.getClass().getName());
+        packet.write(out);
+    }
+
+    @Override
+    public void read(ByteBuffer in)
+    {
+        try {
+            var packetClass = Class.forName(in.readString());
+            this.packet = (PacketBase) Allocator.allocate(packetClass);
+
+            if (packet == null) {
+                Packery.log(Level.SEVERE, this.getClass(), "Packet cannot be allocated");
+                return;
+            }
+
+            this.packet.read(in);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

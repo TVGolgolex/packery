@@ -1,4 +1,4 @@
-package de.pascxl.packery.events;
+package de.pascxl.packery.test.test.respond;
 
 /*
  * MIT License
@@ -24,13 +24,21 @@ package de.pascxl.packery.events;
  * SOFTWARE.
  */
 
-import com.github.golgolex.eventum.events.Event;
-import io.netty5.channel.Channel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import de.pascxl.packery.packet.document.JsonDocument;
+import de.pascxl.packery.packet.listener.PacketRespondListener;
+import de.pascxl.packery.packet.sender.PacketSender;
+import de.pascxl.packery.test.test.TestPacket;
+import de.pascxl.packery.utils.StringUtils;
+import io.netty5.channel.ChannelHandlerContext;
 
-@Getter
-@AllArgsConstructor
-public class UnauthenticatedChannelInit implements Event {
-    private final Channel channel;
+public class TestRequestPacketListener extends PacketRespondListener<TestRequestPacket> {
+    @Override
+    public void call(TestRequestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext)
+    {
+        TestPacket testPacket = new TestPacket(packetId, new JsonDocument());
+
+        testPacket.jsonDocument().write("test", packet.message());
+
+        respond(buildRespond(testPacket), packetSender);
+    }
 }

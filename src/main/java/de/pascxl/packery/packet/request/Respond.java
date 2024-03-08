@@ -1,4 +1,9 @@
-package de.pascxl.packery.packet.sender;
+package de.pascxl.packery.packet.request;
+
+import de.pascxl.packery.packet.PacketBase;
+
+
+import java.util.UUID;
 
 /*
  * MIT License
@@ -24,17 +29,5 @@ package de.pascxl.packery.packet.sender;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.PacketBase;
-
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-public abstract class PacketSender {
-
-    private final Queue<?> queue = new ConcurrentLinkedQueue<>();
-
-    public abstract <P extends PacketBase> void sendPacketAsync(P packet);
-
-    public abstract <P extends PacketBase> void sendPacketSync(P packet);
-
+public record Respond<P extends PacketBase>(UUID uniqueId, P resultPacket) {
 }

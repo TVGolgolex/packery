@@ -29,8 +29,8 @@ import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.NettyIdentity;
 import de.pascxl.packery.packet.document.JsonDocument;
-import de.pascxl.packery.packet.document.JsonPacket;
 import de.pascxl.packery.test.test.TestPacket;
+import de.pascxl.packery.test.test.respond.TestRequestPacket;
 import de.pascxl.packery.utils.StringUtils;
 
 import java.util.UUID;
@@ -45,6 +45,7 @@ public class Client {
         nettyClient.connect("0.0.0.0", 27785, false);
 
         nettyClient.packetManager().allowPacket(4);
+        nettyClient.packetManager().allowPacket(3);
 
         TestPacket testPacket = new TestPacket(4, new JsonDocument());
 
@@ -54,6 +55,20 @@ public class Client {
         }
 
         nettyClient.nettyTransmitter().sendPacketAsync(testPacket);
+
+        TestRequestPacket testRequestPacket = new TestRequestPacket("test");
+
+        TestPacket result = (TestPacket) nettyClient.packetManager()
+                .packetRequester()
+                .query(testRequestPacket, nettyClient.nettyTransmitter())
+                .packet();
+
+        if (result == null) {
+            System.out.println("result is null");
+            return;
+        }
+
+        System.out.println(result.jsonDocument().readString("test"));
 
     }
 }
