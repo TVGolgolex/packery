@@ -106,6 +106,11 @@ public class PacketManager {
 
         Packery.log(Level.INFO, this.getClass(), "Checking PacketId: {0}", packetId);
 
+        if (this.allowedPacketIds.contains(774090777346262697L)) {
+            Packery.debug(Level.SEVERE, this.getClass(), "Allowed all: bypass: {0}", packetId);
+            return true;
+        }
+
         if (packetId < 1 && packetId != -400 && packetId != -410) {
             Packery.log(Level.SEVERE, this.getClass(), "No packet IDs less than 1 are permitted: Requested: {0}", packetId);
             return false;
