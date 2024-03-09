@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.defaults.auth;
+package de.pascxl.test.fun.test;
 
 /*
  * MIT License
@@ -24,29 +24,11 @@ package de.pascxl.packery.packet.defaults.auth;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.network.ChannelIdentity;
-import de.pascxl.packery.packet.PacketBase;
-import lombok.Getter;
+import de.pascxl.packery.packet.defaults.document.JsonDocument;
+import de.pascxl.packery.packet.defaults.document.JsonPacket;
 
-@Getter
-public class AuthPacket extends PacketBase {
-
-    private ChannelIdentity channelIdentity;
-
-    public AuthPacket(ChannelIdentity channelIdentity) {
-        super(-400);
-        this.channelIdentity = channelIdentity;
-    }
-
-    @Override
-    public void write(ByteBuffer out) {
-        out.writeString(channelIdentity.namespace());
-        out.writeUUID(channelIdentity.uniqueId());
-    }
-
-    @Override
-    public void read(ByteBuffer in) {
-        channelIdentity = new ChannelIdentity(in.readString(), in.readUUID());
+public class TestPacket extends JsonPacket {
+    public TestPacket(long packetId, JsonDocument jsonDocument) {
+        super(packetId, jsonDocument);
     }
 }

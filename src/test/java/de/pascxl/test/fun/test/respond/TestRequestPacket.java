@@ -1,4 +1,4 @@
-package de.pascxl.packery.test.test.respond;
+package de.pascxl.test.fun.test.respond;
 
 /*
  * MIT License
@@ -24,20 +24,31 @@ package de.pascxl.packery.test.test.respond;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.defaults.document.JsonDocument;
-import de.pascxl.packery.packet.listener.PacketRespondListener;
-import de.pascxl.packery.packet.sender.PacketSender;
-import de.pascxl.packery.test.test.TestPacket;
-import io.netty5.channel.ChannelHandlerContext;
+import de.pascxl.packery.buffer.ByteBuffer;
+import de.pascxl.packery.packet.defaults.request.RequestPacket;
+import lombok.Getter;
 
-public class TestRequestPacketListener extends PacketRespondListener<TestRequestPacket> {
-    @Override
-    public void call(TestRequestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext)
+@Getter
+public class TestRequestPacket extends RequestPacket {
+
+    private String message;
+
+    public TestRequestPacket(String message)
     {
-        TestPacket testPacket = new TestPacket(packetId, new JsonDocument());
+        super(3);
+        this.message = message;
+    }
 
-        testPacket.jsonDocument().write("test", packet.message());
 
-        respond(buildRespond(testPacket), packetSender);
+    @Override
+    public void write(ByteBuffer out)
+    {
+        out.writeString(message);
+    }
+
+    @Override
+    public void read(ByteBuffer in)
+    {
+        this.message = in.readString();
     }
 }

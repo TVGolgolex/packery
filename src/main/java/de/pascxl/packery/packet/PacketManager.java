@@ -28,8 +28,10 @@ import com.github.golgolex.eventum.EventManager;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.events.PacketIdAllowEvent;
 import de.pascxl.packery.events.PacketIdDisallowEvent;
-import de.pascxl.packery.network.NettyIdentity;
+import de.pascxl.packery.network.ChannelIdentity;
+import de.pascxl.packery.packet.defaults.relay.RelayPacket;
 import de.pascxl.packery.packet.listener.PacketReceiveListener;
+import de.pascxl.packery.packet.relay.PacketRouter;
 import de.pascxl.packery.packet.request.PacketRequester;
 import de.pascxl.packery.packet.sender.PacketSender;
 import io.netty5.channel.ChannelHandlerContext;
@@ -48,9 +50,11 @@ public class PacketManager {
     private final Map<Long, Collection<Class<? extends PacketReceiveListener<?>>>> packetHandlers = new ConcurrentHashMap<>(0);
     private final Collection<Long> allowedPacketIds = new ArrayList<>();
     private final PacketRequester packetRequester;
+    private final PacketRouter packetRouter;
 
     public PacketManager() {
         this.packetRequester = new PacketRequester(this);
+        this.packetRouter = new PacketRouter(this.packetRequester);
     }
 
     public <P extends PacketBase> boolean registerPacketHandler(long packetId, Class<? extends PacketReceiveListener<P>> handler) {
@@ -88,8 +92,8 @@ public class PacketManager {
     }
 
     public <P extends PacketBase> int callHandlers(P packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext) {
-        int calledCount = 0;
-        for (PacketReceiveListener<P> listener : this.collectHandlers(packet)) {
+        var calledCount = 0;
+        for (var listener : this.collectHandlers(packet)) {
             calledCount++;
             if (packet.uniqueId() != null) {
                 listener.uniqueId(packet.uniqueId());
@@ -102,7 +106,7 @@ public class PacketManager {
     }
 
     public boolean isPacketAllow(PacketBase packetBase) {
-        long packetId = packetBase.packetId();
+        var packetId = packetBase.packetId();
 
         Packery.log(Level.INFO, this.getClass(), "Checking PacketId: {0}", packetId);
 
@@ -137,11 +141,17 @@ public class PacketManager {
         }
     }
 
-    public <P extends PacketBase> void call(P packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext, NettyIdentity authentication) {
+    public <P extends PacketBase> void call(P packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext, ChannelIdentity authentication) {
         Packery.debug(Level.INFO, this.getClass(), "Received Packet [id=" + packet.packetId() + ";uuid=" + packet.uniqueId() + ";seasonId=" + packet.seasonId() + "] from " + authentication.namespace() + "#" + authentication.uniqueId());
         if (packet.uniqueId() != null && this.packetRequester.waiting().containsKey(packet.uniqueId())) {
             this.packetRequester.dispatch(packet);
         }
+
+        if (packet instanceof RelayPacket relayPacket) {
+
+            return;
+        }
+
         callHandlers(packet, packetSender, channelHandlerContext);
     }
 

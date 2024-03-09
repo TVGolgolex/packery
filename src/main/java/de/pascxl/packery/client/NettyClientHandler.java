@@ -25,6 +25,7 @@ package de.pascxl.packery.client;
  */
 
 import de.pascxl.packery.Packery;
+import de.pascxl.packery.internal.PacketOutIdentityInit;
 import de.pascxl.packery.packet.PacketBase;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
@@ -41,7 +42,15 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, PacketBase msg) throws Exception {
         Packery.debug(Level.INFO, this.getClass(), "messageReceived: " + msg.getClass().getSimpleName());
-        this.client.packetManager.call(msg, this.client.nettyTransmitter(), ctx, this.client.account());
+
+        if (msg instanceof PacketOutIdentityInit packet) {
+            if (client.channelIdentities().stream().noneMatch(channelIdentity -> channelIdentity.uniqueId().equals(packet.channelIdentity().uniqueId()))) {
+                client.channelIdentities().add(packet.channelIdentity());
+            }
+            return;
+        }
+
+        this.client.packetManager.call(msg, this.client.nettyTransmitter(), ctx, this.client.channelIdentity());
     }
 
     @Override

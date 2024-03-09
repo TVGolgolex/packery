@@ -91,7 +91,7 @@ public class NettyServer implements AutoCloseable{
 
         Packery.debug(Level.INFO, this.getClass(), "Using " + (Epoll.isAvailable() ? "Epoll native transport" : "NIO transport"));
 
-        Future<Channel> channelFuture = serverBootstrap
+        var channelFuture = serverBootstrap
                 .bind(
                         hostName,
                         port)

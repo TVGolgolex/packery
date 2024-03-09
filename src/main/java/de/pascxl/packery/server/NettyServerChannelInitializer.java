@@ -54,28 +54,4 @@ public class NettyServerChannelInitializer extends ChannelInitializer<Channel> {
         EventManager.call(new ChannelInitEvent(ch));
         Packery.debug(Level.INFO, this.getClass(), "EventCall ChannelInit: (" + ch.remoteAddress().toString() + ")");
     }
-
-/*    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if ((!ctx.channel().isActive() || !ctx.channel().isOpen() || !ctx.channel().isWritable())) {
-            Packery.LOGGER.log(Level.INFO, "Channel inactive: " + ctx.channel().remoteAddress());
-            unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
-            ctx.close();
-        }
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Packery.debug(Level.INFO, this.getClass(), "Recache Channel: " + ctx.channel().remoteAddress());
-        unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
-        unauthenticated.add(ctx.channel());
-    }
-
-    @Override
-    public void channelExceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (!(cause instanceof IOException))
-        {
-            Packery.debug(Level.SEVERE, this.getClass(), cause.getMessage());
-        }
-    }*/
 }

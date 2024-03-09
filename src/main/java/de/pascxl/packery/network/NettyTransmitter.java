@@ -34,11 +34,11 @@ import lombok.Setter;
 @Getter
 public class NettyTransmitter extends PacketSender {
 
-    private final NettyIdentity identity;
+    private final ChannelIdentity identity;
     @Setter
     private Channel channel;
 
-    public NettyTransmitter(NettyIdentity identity, Channel channel) {
+    public NettyTransmitter(ChannelIdentity identity, Channel channel) {
         this.identity = identity;
         this.channel = channel;
     }

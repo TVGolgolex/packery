@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.test.fun;
 
 /*
  * MIT License
@@ -27,11 +27,11 @@ package de.pascxl.packery.test;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.InactiveAction;
-import de.pascxl.packery.network.NettyIdentity;
+import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.packet.defaults.document.JsonDocument;
 import de.pascxl.packery.packet.queue.PacketQueue;
-import de.pascxl.packery.test.test.TestPacket;
-import de.pascxl.packery.test.test.respond.TestRequestPacket;
+import de.pascxl.test.fun.test.TestPacket;
+import de.pascxl.test.fun.test.respond.TestRequestPacket;
 import de.pascxl.packery.utils.StringUtils;
 
 import java.util.UUID;
@@ -42,7 +42,7 @@ public class Client {
 
         Packery.DEV_MODE = true;
 
-        NettyClient nettyClient = new NettyClient(new NettyIdentity("test", UUID.randomUUID()), InactiveAction.SHUTDOWN);
+        NettyClient nettyClient = new NettyClient(new ChannelIdentity("test", UUID.randomUUID()), InactiveAction.SHUTDOWN);
 
         nettyClient.connect("0.0.0.0", 27785, false);
 

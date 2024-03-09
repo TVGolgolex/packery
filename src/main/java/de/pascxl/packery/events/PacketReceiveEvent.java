@@ -25,7 +25,7 @@ package de.pascxl.packery.events;
  */
 
 import com.github.golgolex.eventum.events.Event;
-import de.pascxl.packery.network.NettyIdentity;
+import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.sender.PacketSender;
 import lombok.AllArgsConstructor;
@@ -35,6 +35,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PacketReceiveEvent implements Event {
     private final PacketSender packetSender;
-    private final NettyIdentity nettyIdentity;
+    private final ChannelIdentity channelIdentity;
     private final PacketBase packet;
 }

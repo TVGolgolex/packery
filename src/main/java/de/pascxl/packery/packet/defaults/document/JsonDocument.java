@@ -109,7 +109,7 @@ public class JsonDocument {
     }
 
     public static JsonDocument fromPath(@NonNull Path backend) {
-        try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(backend),
+        try (var reader = new InputStreamReader(Files.newInputStream(backend),
                 StandardCharsets.UTF_8); BufferedReader bufferedReader = new BufferedReader(reader)) {
             JsonObject object = JsonParser.parseReader(bufferedReader).getAsJsonObject();
             return new JsonDocument(object);
@@ -120,7 +120,7 @@ public class JsonDocument {
     }
 
     public static JsonDocument parseJson(String input) {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+        try (var inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
              InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             return new JsonDocument(JsonParser.parseReader(reader).getAsJsonObject());
         } catch (IOException e) {
@@ -165,7 +165,7 @@ public class JsonDocument {
     }
 
     public JsonDocument write(@NonNull String key, @NonNull List<String> value) {
-        JsonArray jsonElements = new JsonArray();
+        var jsonElements = new JsonArray();
 
         for (String b : value) {
             jsonElements.add(b);
@@ -176,7 +176,7 @@ public class JsonDocument {
     }
 
     public JsonDocument appendValues(@NonNull Map<String, Object> map) {
-        for (Map.Entry<String, Object> stringObjectEntry : map.entrySet()) {
+        for (var stringObjectEntry : map.entrySet()) {
             write(stringObjectEntry.getKey(), stringObjectEntry.getValue());
         }
         return this;
@@ -186,7 +186,7 @@ public class JsonDocument {
         if (!jsonObject.has(key)) {
             return null;
         }
-        JsonElement element = jsonObject.get(key);
+        var element = jsonObject.get(key);
         return JsonUtils.PRETTY_JSON.fromJson(element, aClass);
     }
 
@@ -194,7 +194,7 @@ public class JsonDocument {
         if (!jsonObject.has(key)) {
             return null;
         }
-        JsonElement element = jsonObject.get(key);
+        var element = jsonObject.get(key);
         return JsonUtils.PRETTY_JSON.fromJson(element, type);
     }
 
@@ -269,7 +269,7 @@ public class JsonDocument {
     }
 
     public void clear() {
-        for (String key : jsonObject.keySet()) {
+        for (var key : jsonObject.keySet()) {
             delete(key);
         }
     }
@@ -312,7 +312,7 @@ public class JsonDocument {
     }
 
     public boolean saveAsConfig(@NonNull Path path) {
-        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(Files.newOutputStream(path), StandardCharsets.UTF_8)) {
+        try (var outputStreamWriter = new OutputStreamWriter(Files.newOutputStream(path), StandardCharsets.UTF_8)) {
             JsonUtils.PRETTY_JSON.toJson(jsonObject, outputStreamWriter);
             return true;
         } catch (IOException e) {
@@ -326,7 +326,7 @@ public class JsonDocument {
         if (backend.exists()) {
             backend.delete();
         }
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(backend), StandardCharsets.UTF_8)) {
+        try (var writer = new OutputStreamWriter(new FileOutputStream(backend), StandardCharsets.UTF_8)) {
             JsonUtils.PRETTY_JSON.toJson(jsonObject, (writer));
             return true;
         } catch (IOException ex) {
@@ -336,7 +336,7 @@ public class JsonDocument {
     }
 
     public JsonDocument loadToExistingDocument(@NonNull File backend) {
-        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(backend), StandardCharsets.UTF_8)) {
+        try (var reader = new InputStreamReader(new FileInputStream(backend), StandardCharsets.UTF_8)) {
             this.jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             this.file = backend;
             return this;
@@ -347,7 +347,7 @@ public class JsonDocument {
     }
 
     public JsonDocument loadToExistingDocument(@NonNull Path path) {
-        try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8)) {
+        try (var reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8)) {
             this.jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             return this;
         } catch (Exception ex) {

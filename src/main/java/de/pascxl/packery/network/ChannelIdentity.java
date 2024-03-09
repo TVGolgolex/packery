@@ -25,5 +25,5 @@ import java.util.UUID;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public record NettyIdentity(String namespace, UUID uniqueId) {
+public record ChannelIdentity(String namespace, UUID uniqueId) {
 }

@@ -1,4 +1,4 @@
-package de.pascxl.packery.test;
+package de.pascxl.packery.packet.relay;
 
 /*
  * MIT License
@@ -24,25 +24,26 @@ package de.pascxl.packery.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.Packery;
-import de.pascxl.packery.server.NettyServer;
-import de.pascxl.packery.test.test.TestPacketListener;
-import de.pascxl.packery.test.test.respond.TestRequestPacketListener;
+import de.pascxl.packery.network.NettyTransmitter;
+import de.pascxl.packery.packet.defaults.relay.RelayPacket;
+import de.pascxl.packery.packet.request.PacketRequester;
+import lombok.AccessLevel;
+import lombok.Getter;
 
-public class Server {
-    public static void main(String[] args) {
+public class PacketRouter {
 
-        Packery.DEV_MODE = true;
+    @Getter(AccessLevel.NONE)
+    private final PacketRequester packetRequester;
 
-        NettyServer nettyServer = new NettyServer();
+    public PacketRouter(PacketRequester packetRequester) {
+        this.packetRequester = packetRequester;
+    }
 
-        nettyServer.connect("0.0.0.0", 27785, false);
+    public void relayPacket(RelayPacket relayPacket, NettyTransmitter transmitter) {
+        var respond = packetRequester.query(relayPacket, transmitter);
 
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
 
-        nettyServer.packetManager().allowPacket(3);
-        nettyServer.packetManager().registerPacketHandler(3, TestRequestPacketListener.class);
 
     }
+
 }

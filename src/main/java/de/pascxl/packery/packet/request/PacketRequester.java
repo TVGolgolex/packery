@@ -46,7 +46,7 @@ public class PacketRequester {
     }
 
     public <P extends RequestPacket, PR extends PacketBase> RespondPacket query(P packet, NettyTransmitter nettyTransmitter) {
-        UUID queryUUID = UUID.randomUUID();
+        var queryUUID = UUID.randomUUID();
         packet.uniqueId(queryUUID);
 
         Value<Respond<?>> handled = new Value<>(null);

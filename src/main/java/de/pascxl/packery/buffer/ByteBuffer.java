@@ -3,6 +3,8 @@ package de.pascxl.packery.buffer;
 import io.netty5.buffer.Buffer;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
 /*
@@ -104,4 +106,141 @@ public record ByteBuffer(Buffer buffer) {
     public double readDouble() {
         return this.buffer.readDouble();
     }
+
+    public ByteBuffer writeCollectionInteger(Collection<Integer> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeInt(element);
+        }
+        return this;
+    }
+
+    public Collection<Integer> readCollectionInteger() {
+        var size = this.readInt();
+        Collection<Integer> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readInt());
+        }
+        return collection;
+    }
+
+    public ByteBuffer writeCollectionString(Collection<String> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeString(element);
+        }
+        return this;
+    }
+
+    public Collection<String> readCollectionString() {
+        var size = this.readInt();
+        Collection<String> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readString());
+        }
+        return collection;
+    }
+
+    public ByteBuffer writeCollectionBoolean(Collection<Boolean> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeBoolean(element);
+        }
+        return this;
+    }
+
+    public Collection<Boolean> readCollectionBoolean() {
+        var size = this.readInt();
+        Collection<Boolean> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readBoolean());
+        }
+        return collection;
+    }
+
+    public ByteBuffer writeCollectionUUID(Collection<UUID> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeUUID(element);
+        }
+        return this;
+    }
+
+    public Collection<UUID> readCollectionUUID() {
+        var size = this.readInt();
+        Collection<UUID> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readUUID());
+        }
+        return collection;
+    }
+
+    public ByteBuffer writeCollectionEnum(Collection<Enum<?>> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeEnum(element);
+        }
+        return this;
+    }
+
+    public <T extends Enum<T>> Collection<T> readCollectionEnum(Class<T> clazz) {
+        var size = this.readInt();
+        Collection<T> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readEnum(clazz));
+        }
+        return collection;
+    }
+
+    public ByteBuffer writeCollectionLong(Collection<Long> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeLong(element);
+        }
+        return this;
+    }
+
+    public Collection<Long> readCollectionLong() {
+        var size = this.readInt();
+        Collection<Long> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readLong());
+        }
+        return collection;
+    }
+
+    public ByteBuffer writeCollectionFloat(Collection<Float> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeFloat(element);
+        }
+        return this;
+    }
+
+    public Collection<Float> readCollectionFloat() {
+        var size = this.readInt();
+        Collection<Float> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readFloat());
+        }
+        return collection;
+    }
+
+    public ByteBuffer writeCollectionDouble(Collection<Double> collection) {
+        this.writeInt(collection.size());
+        for (var element : collection) {
+            this.writeDouble(element);
+        }
+        return this;
+    }
+
+    public Collection<Double> readCollectionDouble() {
+        var size = this.readInt();
+        Collection<Double> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            collection.add(this.readDouble());
+        }
+        return collection;
+    }
+
 }

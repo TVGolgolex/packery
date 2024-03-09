@@ -1,4 +1,4 @@
-package de.pascxl.packery.test.test;
+package de.pascxl.test.fun.test.respond;
 
 /*
  * MIT License
@@ -24,18 +24,20 @@ package de.pascxl.packery.test.test;
  * SOFTWARE.
  */
 
-import com.google.gson.JsonElement;
-import de.pascxl.packery.packet.listener.PacketReceiveListener;
+import de.pascxl.packery.packet.defaults.document.JsonDocument;
+import de.pascxl.packery.packet.listener.PacketRespondListener;
 import de.pascxl.packery.packet.sender.PacketSender;
+import de.pascxl.test.fun.test.TestPacket;
 import io.netty5.channel.ChannelHandlerContext;
 
-import java.util.Map;
-
-public class TestPacketListener extends PacketReceiveListener<TestPacket> {
+public class TestRequestPacketListener extends PacketRespondListener<TestRequestPacket> {
     @Override
-    public void call(TestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext) {
-        for (Map.Entry<String, JsonElement> stringJsonElementEntry : packet.jsonDocument().jsonObject().entrySet()) {
-            System.out.println(stringJsonElementEntry.getKey() + ": " + stringJsonElementEntry.getValue().toString());
-        }
+    public void call(TestRequestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext)
+    {
+        TestPacket testPacket = new TestPacket(packetId, new JsonDocument());
+
+        testPacket.jsonDocument().write("test", packet.message());
+
+        respond(buildRespond(testPacket), packetSender);
     }
 }

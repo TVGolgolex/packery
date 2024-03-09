@@ -25,9 +25,11 @@ package de.pascxl.packery.server;
  */
 
 import de.pascxl.packery.Packery;
+import de.pascxl.packery.internal.PacketOutIdentityInit;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.defaults.auth.AuthPacket;
+import de.pascxl.packery.packet.defaults.relay.RelayPacket;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
@@ -56,8 +58,16 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
         if (msg instanceof AuthPacket authPacket) {
             if (unauthenticated.stream().anyMatch(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()))) {
                 unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
-                transmitters.add(new NettyTransmitter(authPacket.nettyIdentity(), ctx.channel()));
-                Packery.debug(Level.INFO, this.getClass(), "Created new Transmitter for " + authPacket.nettyIdentity().namespace() + "#" + authPacket.nettyIdentity().uniqueId() + "/" + ctx.channel().remoteAddress());
+                NettyTransmitter nettyTransmitter = new NettyTransmitter(authPacket.channelIdentity(), ctx.channel());
+                transmitters.add(nettyTransmitter);
+                Packery.debug(Level.INFO, this.getClass(), "Created new Transmitter for " + authPacket.channelIdentity().namespace() + "#" + authPacket.channelIdentity().uniqueId() + "/" + ctx.channel().remoteAddress());
+
+                for (NettyTransmitter transmitter : transmitters) {
+                    if (transmitter.identity() != nettyTransmitter.identity()) {
+                        transmitter.sendPacketSync(new PacketOutIdentityInit(nettyTransmitter.identity()));
+                        Packery.debug(Level.INFO, this.getClass(), "Send PacketOutIdentityInit for " + authPacket.channelIdentity().namespace() + "#" + authPacket.channelIdentity().uniqueId() + "/" + ctx.channel().remoteAddress() + " to " + nettyTransmitter.identity().namespace() + "#" + nettyTransmitter.identity().uniqueId());
+                    }
+                }
             }
             return;
         }

@@ -26,18 +26,23 @@ package de.pascxl.packery.client;
 
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.network.InactiveAction;
-import de.pascxl.packery.network.NettyIdentity;
+import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketManager;
 import de.pascxl.packery.packet.defaults.auth.AuthPacket;
 import de.pascxl.packery.utils.NettyUtils;
+import de.pascxl.packery.utils.StringUtils;
 import io.netty5.bootstrap.Bootstrap;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelOption;
 import io.netty5.channel.EventLoopGroup;
 import io.netty5.channel.MultithreadEventLoopGroup;
 import lombok.Getter;
+import lombok.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
@@ -45,27 +50,43 @@ import java.util.logging.Level;
 public class NettyClient implements AutoCloseable {
 
     protected final EventLoopGroup eventLoopGroup = new MultithreadEventLoopGroup(2, NettyUtils.createIoHandlerFactory());
-    protected final NettyIdentity account;
+    protected final List<ChannelIdentity> channelIdentities = new ArrayList<>();
+    protected final ChannelIdentity channelIdentity;
     protected final InactiveAction inactiveAction;
     protected final PacketManager packetManager;
     protected NettyTransmitter nettyTransmitter;
     protected Bootstrap bootstrap;
     protected boolean connected = false;
 
-    public NettyClient(NettyIdentity account, InactiveAction inactiveAction, PacketManager packetManager) {
-        this.account = account;
+    public NettyClient(@NonNull ChannelIdentity channelIdentity, @NonNull InactiveAction inactiveAction, @NonNull PacketManager packetManager) {
         this.inactiveAction = inactiveAction;
         this.packetManager = packetManager;
+
+        ChannelIdentity finalIdentity = channelIdentity;
+        if (channelIdentity.namespace() == null || channelIdentity.namespace().isEmpty()) {
+            finalIdentity = new ChannelIdentity(StringUtils.generateRandomString(8), channelIdentity.uniqueId());
+        }
+        if (channelIdentity.uniqueId() == null) {
+            finalIdentity = new ChannelIdentity(finalIdentity.namespace(), UUID.randomUUID());
+        }
+        this.channelIdentity = finalIdentity;
     }
 
-    public NettyClient(NettyIdentity account, InactiveAction inactiveAction) {
-        this.account = account;
+    public NettyClient(@NonNull ChannelIdentity channelIdentity, @NonNull InactiveAction inactiveAction) {
         this.inactiveAction = inactiveAction;
         this.packetManager = new PacketManager();
+
+        ChannelIdentity finalIdentity = channelIdentity;
+        if (channelIdentity.namespace() == null || channelIdentity.namespace().isEmpty()) {
+            finalIdentity = new ChannelIdentity(StringUtils.generateRandomString(8), channelIdentity.uniqueId());
+        }
+        if (channelIdentity.uniqueId() == null) {
+            finalIdentity = new ChannelIdentity(finalIdentity.namespace(), UUID.randomUUID());
+        }
+        this.channelIdentity = finalIdentity;
     }
 
-    public boolean connect(String hostName, int port, boolean ssl) {
-
+    public boolean connect(@NonNull String hostName, int port, boolean ssl) {
         this.bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .channelFactory(NettyUtils.createChannelFactory())
@@ -74,17 +95,8 @@ public class NettyClient implements AutoCloseable {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new NettyClientChannelInitializer(this));
 
-/*        this.bootstrap.connect(hostName, port)
-                .addListener(future -> {
-                    if (future.isSuccess()) {
-                        Packery.LOGGER.log(Level.INFO, Packery.BRANDING + " Successfully connected @" + hostName + ":" + port);
-                    } else {
-                        Packery.LOGGER.log(Level.INFO, Packery.BRANDING + " failed while connecting @" + hostName + ":" + port);
-                    }
-                });*/
-
-        InitThread initThread = new InitThread(this.bootstrap, hostName, port);
-        Thread thread = new Thread(initThread);
+        var initThread = new InitThread(this.bootstrap, hostName, port);
+        var thread = new Thread(initThread);
         thread.start();
         try {
             thread.join();
@@ -98,9 +110,8 @@ public class NettyClient implements AutoCloseable {
             return false;
         }
 
-        this.nettyTransmitter = new NettyTransmitter(this.account, initThread.channel());
-
-        this.nettyTransmitter.channel().writeAndFlush(new AuthPacket(this.account));
+        this.nettyTransmitter = new NettyTransmitter(this.channelIdentity, initThread.channel());
+        this.nettyTransmitter.channel().writeAndFlush(new AuthPacket(this.channelIdentity));
         connected = true;
         return true;
     }

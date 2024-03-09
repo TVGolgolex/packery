@@ -62,8 +62,8 @@ public class PacketQueue {
             }
             sending = true;;
 
-            long delayMillis = timeUnit.toMillis(delay);
-            long startTime = System.currentTimeMillis();
+            var delayMillis = timeUnit.toMillis(delay);
+            var startTime = System.currentTimeMillis();
 
             while (System.currentTimeMillis() - startTime < delayMillis) {
                 try {
@@ -94,8 +94,8 @@ public class PacketQueue {
             }
             sending = true;
 
-            long delayMillis = timeUnit.toMillis(delay);
-            long startTime = System.currentTimeMillis();
+            var delayMillis = timeUnit.toMillis(delay);
+            var startTime = System.currentTimeMillis();
 
             while (System.currentTimeMillis() - startTime < delayMillis) {
                 try {
