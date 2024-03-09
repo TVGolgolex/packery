@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.document;
+package de.pascxl.packery.packet.defaults.document;
 
 /*
  * MIT License

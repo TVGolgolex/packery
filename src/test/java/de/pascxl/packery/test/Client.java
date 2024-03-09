@@ -28,12 +28,14 @@ import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.NettyIdentity;
-import de.pascxl.packery.packet.document.JsonDocument;
+import de.pascxl.packery.packet.defaults.document.JsonDocument;
+import de.pascxl.packery.packet.queue.PacketQueue;
 import de.pascxl.packery.test.test.TestPacket;
 import de.pascxl.packery.test.test.respond.TestRequestPacket;
 import de.pascxl.packery.utils.StringUtils;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class Client {
     public static void main(String[] args) {
@@ -47,11 +49,20 @@ public class Client {
         nettyClient.packetManager().allowPacket(4);
         nettyClient.packetManager().allowPacket(3);
 
+        PacketQueue packetQueue = new PacketQueue(nettyClient.nettyTransmitter());
+
+        for (int i = 0; i < 25; i++) {
+            TestPacket testPacket = new TestPacket(4, new JsonDocument());
+            testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
+            packetQueue.addPacket(testPacket);
+        }
+
+        packetQueue.sendDelayAsync(10, TimeUnit.SECONDS);
+
         TestPacket testPacket = new TestPacket(4, new JsonDocument());
 
         for (int i = 0; i < 30; i++) {
             testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
-//            jsonPacket.jsonDocument().write(StringUtils.generateRandomString(7), UUID.randomUUID());
         }
 
         nettyClient.nettyTransmitter().sendPacketAsync(testPacket);

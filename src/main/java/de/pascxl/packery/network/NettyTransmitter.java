@@ -44,6 +44,24 @@ public class NettyTransmitter extends PacketSender {
     }
 
     @Override
+    public <P extends PacketBase> void writePacket(P packet)
+    {
+        if (!(channel != null && channel.isOpen())) {
+            return;
+        }
+        channel.write(packet);
+    }
+
+    @Override
+    public void flush()
+    {
+        if (!(channel != null && channel.isOpen())) {
+            return;
+        }
+        channel.flush();
+    }
+
+    @Override
     public <P extends PacketBase> void sendPacketAsync(P packet) {
         if (!(channel != null && channel.isOpen())) {
             return;

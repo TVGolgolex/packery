@@ -39,9 +39,9 @@ public class NettyServerChannelInitializer extends ChannelInitializer<Channel> {
     private final NettyServer server;
     private final NettyServerHandler nettyServerHandler;
 
-    public NettyServerChannelInitializer(NettyServer server) {
+    public NettyServerChannelInitializer(NettyServer server, NettyServerHandler nettyServerHandler) {
         this.server = server;
-        this.nettyServerHandler = new NettyServerHandler(server);
+        this.nettyServerHandler = nettyServerHandler;
     }
 
     @Override

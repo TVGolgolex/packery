@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.auth;
+package de.pascxl.packery.packet.defaults.request;
 
 /*
  * MIT License
@@ -24,29 +24,49 @@ package de.pascxl.packery.packet.auth;
  * SOFTWARE.
  */
 
+import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.network.NettyIdentity;
 import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.utils.Allocator;
 import lombok.Getter;
 
+import java.util.UUID;
+import java.util.logging.Level;
+
 @Getter
-public class AuthPacket extends PacketBase {
+public class RespondPacket extends PacketBase {
 
-    private NettyIdentity nettyIdentity;
+    private PacketBase packet;
 
-    public AuthPacket(NettyIdentity nettyIdentity) {
-        super(-400);
-        this.nettyIdentity = nettyIdentity;
+    public RespondPacket(long packetId, UUID uniqueId, PacketBase packet)
+    {
+        super(packetId, uniqueId);
+        this.packet = packet;
     }
 
     @Override
-    public void write(ByteBuffer out) {
-        out.writeString(nettyIdentity.namespace());
-        out.writeUUID(nettyIdentity.uniqueId());
+    public void write(ByteBuffer out)
+    {
+        out.writeString(packet.getClass().getName());
+        packet.write(out);
     }
 
     @Override
-    public void read(ByteBuffer in) {
-        nettyIdentity = new NettyIdentity(in.readString(), in.readUUID());
+    public void read(ByteBuffer in)
+    {
+        try {
+            var packetClass = Class.forName(in.readString());
+            this.packet = (PacketBase) Allocator.allocate(packetClass);
+
+            if (packet == null) {
+                Packery.log(Level.SEVERE, this.getClass(), "Packet cannot be allocated");
+                return;
+            }
+
+            this.packet.read(in);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
+
 }

@@ -50,16 +50,19 @@ public class NettyServer implements AutoCloseable{
     protected final EventLoopGroup bossEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final EventLoopGroup workerEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final PacketManager packetManager;
+    protected final NettyServerHandler nettyServerHandler;
     protected ServerBootstrap serverBootstrap;
     protected SslContext ssl;
     protected boolean connected = false;
 
     public NettyServer(PacketManager packetManager) {
         this.packetManager = packetManager;
+        this.nettyServerHandler = new NettyServerHandler(this);
     }
 
     public NettyServer() {
         this.packetManager = new PacketManager();
+        this.nettyServerHandler = new NettyServerHandler(this);
     }
 
     public boolean connect(String hostName, int port, boolean ssl) {
@@ -84,7 +87,7 @@ public class NettyServer implements AutoCloseable{
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.AUTO_READ, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(new NettyServerChannelInitializer(this));
+                .childHandler(new NettyServerChannelInitializer(this, nettyServerHandler));
 
         Packery.debug(Level.INFO, this.getClass(), "Using " + (Epoll.isAvailable() ? "Epoll native transport" : "NIO transport"));
 

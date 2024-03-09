@@ -33,6 +33,10 @@ public abstract class PacketSender {
 
     private final Queue<?> queue = new ConcurrentLinkedQueue<>();
 
+    public abstract <P extends PacketBase> void writePacket(P packet);
+
+    public abstract void flush();
+
     public abstract <P extends PacketBase> void sendPacketAsync(P packet);
 
     public abstract <P extends PacketBase> void sendPacketSync(P packet);

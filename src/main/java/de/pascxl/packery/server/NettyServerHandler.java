@@ -24,13 +24,10 @@ package de.pascxl.packery.server;
  * SOFTWARE.
  */
 
-import com.google.gson.JsonElement;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.packet.PacketManager;
-import de.pascxl.packery.packet.auth.AuthPacket;
-import de.pascxl.packery.packet.document.JsonPacket;
+import de.pascxl.packery.packet.defaults.auth.AuthPacket;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
@@ -39,7 +36,6 @@ import lombok.Getter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 @Getter

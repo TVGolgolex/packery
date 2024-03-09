@@ -29,7 +29,7 @@ import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.NettyIdentity;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketManager;
-import de.pascxl.packery.packet.auth.AuthPacket;
+import de.pascxl.packery.packet.defaults.auth.AuthPacket;
 import de.pascxl.packery.utils.NettyUtils;
 import io.netty5.bootstrap.Bootstrap;
 import io.netty5.channel.Channel;

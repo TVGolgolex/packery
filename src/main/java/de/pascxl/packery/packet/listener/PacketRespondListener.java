@@ -25,8 +25,8 @@ package de.pascxl.packery.packet.listener;
  */
 
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.packet.request.RequestPacket;
-import de.pascxl.packery.packet.request.RespondPacket;
+import de.pascxl.packery.packet.defaults.request.RequestPacket;
+import de.pascxl.packery.packet.defaults.request.RespondPacket;
 import de.pascxl.packery.packet.sender.PacketSender;
 import lombok.NonNull;
 

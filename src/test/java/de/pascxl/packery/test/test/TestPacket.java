@@ -24,8 +24,8 @@ package de.pascxl.packery.test.test;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.document.JsonDocument;
-import de.pascxl.packery.packet.document.JsonPacket;
+import de.pascxl.packery.packet.defaults.document.JsonDocument;
+import de.pascxl.packery.packet.defaults.document.JsonPacket;
 
 public class TestPacket extends JsonPacket {
     public TestPacket(long packetId, JsonDocument jsonDocument) {

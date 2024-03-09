@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.document;
+package de.pascxl.packery.packet.defaults.request;
 
 /*
  * MIT License
@@ -24,41 +24,13 @@ package de.pascxl.packery.packet.document;
  * SOFTWARE.
  */
 
-import com.google.gson.JsonObject;
-import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.utils.JsonUtils;
-import lombok.Getter;
 
-import java.util.UUID;
+public abstract class RequestPacket extends PacketBase {
 
-@Getter
-public class JsonPacket extends PacketBase {
-
-    private JsonDocument jsonDocument;
-
-    public JsonPacket(long packetId) {
+    public RequestPacket(long packetId)
+    {
         super(packetId);
-        this.jsonDocument = new JsonDocument();
     }
 
-    public JsonPacket(long packetId, JsonDocument jsonDocument) {
-        super(packetId);
-        this.jsonDocument = jsonDocument;
-    }
-
-    public JsonPacket(long packetId, UUID uniqueId, JsonDocument jsonDocument) {
-        super(packetId, uniqueId);
-        this.jsonDocument = jsonDocument;
-    }
-
-    @Override
-    public void write(ByteBuffer out) {
-        out.writeString(this.jsonDocument.jsonObjectToString());
-    }
-
-    @Override
-    public void read(ByteBuffer in) {
-        this.jsonDocument = new JsonDocument(JsonUtils.JSON.fromJson(in.readString(), JsonObject.class));
-    }
 }

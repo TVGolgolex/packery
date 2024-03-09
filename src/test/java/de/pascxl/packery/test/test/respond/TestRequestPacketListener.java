@@ -24,11 +24,10 @@ package de.pascxl.packery.test.test.respond;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.document.JsonDocument;
+import de.pascxl.packery.packet.defaults.document.JsonDocument;
 import de.pascxl.packery.packet.listener.PacketRespondListener;
 import de.pascxl.packery.packet.sender.PacketSender;
 import de.pascxl.packery.test.test.TestPacket;
-import de.pascxl.packery.utils.StringUtils;
 import io.netty5.channel.ChannelHandlerContext;
 
 public class TestRequestPacketListener extends PacketRespondListener<TestRequestPacket> {

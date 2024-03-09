@@ -27,6 +27,8 @@ package de.pascxl.packery.packet.request;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.PacketManager;
+import de.pascxl.packery.packet.defaults.request.RequestPacket;
+import de.pascxl.packery.packet.defaults.request.RespondPacket;
 import de.pascxl.packery.utils.Value;
 import lombok.Getter;
 

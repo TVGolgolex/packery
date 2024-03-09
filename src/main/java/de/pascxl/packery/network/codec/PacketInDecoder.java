@@ -44,6 +44,7 @@ public class PacketInDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, Buffer in) throws Exception {
         var byteBuffer = new ByteBuffer(in);
+        Packery.debug(Level.INFO, this.getClass(), "Before read, length: {0}", in.readableBytes());
 
         try {
             var packetClassName = byteBuffer.readString();
@@ -73,5 +74,7 @@ public class PacketInDecoder extends ByteToMessageDecoder {
         } catch (Exception exception) {
             Packery.log(Level.SEVERE, this.getClass(), exception.getMessage());
         }
+
+        Packery.debug(Level.INFO, this.getClass(), "After read, length: {0}", in.readableBytes());
     }
 }

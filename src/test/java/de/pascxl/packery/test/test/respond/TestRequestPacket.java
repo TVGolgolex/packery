@@ -25,7 +25,7 @@ package de.pascxl.packery.test.test.respond;
  */
 
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.packet.request.RequestPacket;
+import de.pascxl.packery.packet.defaults.request.RequestPacket;
 import lombok.Getter;
 
 @Getter
