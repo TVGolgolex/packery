@@ -46,6 +46,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> 
         if (msg instanceof PacketOutIdentityInit packet) {
             if (client.channelIdentities().stream().noneMatch(channelIdentity -> channelIdentity.uniqueId().equals(packet.channelIdentity().uniqueId()))) {
                 client.channelIdentities().add(packet.channelIdentity());
+                Packery.debug(Level.INFO, this.getClass(), "Initialized Channel-Identity: "u);
             }
             return;
         }
