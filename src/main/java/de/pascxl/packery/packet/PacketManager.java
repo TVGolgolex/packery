@@ -29,9 +29,9 @@ import de.pascxl.packery.Packery;
 import de.pascxl.packery.events.PacketIdAllowEvent;
 import de.pascxl.packery.events.PacketIdDisallowEvent;
 import de.pascxl.packery.network.ChannelIdentity;
-import de.pascxl.packery.packet.defaults.relay.RelayPacket;
+import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
 import de.pascxl.packery.packet.listener.PacketReceiveListener;
-import de.pascxl.packery.packet.relay.PacketRouter;
+import de.pascxl.packery.packet.router.PacketRouter;
 import de.pascxl.packery.packet.request.PacketRequester;
 import de.pascxl.packery.packet.sender.PacketSender;
 import io.netty5.channel.ChannelHandlerContext;
@@ -54,7 +54,7 @@ public class PacketManager {
 
     public PacketManager() {
         this.packetRequester = new PacketRequester(this);
-        this.packetRouter = new PacketRouter(this.packetRequester);
+        this.packetRouter = new PacketRouter();
     }
 
     public <P extends PacketBase> boolean registerPacketHandler(long packetId, Class<? extends PacketReceiveListener<P>> handler) {
@@ -115,7 +115,10 @@ public class PacketManager {
             return true;
         }
 
-        if (packetId < 1 && packetId != -400 && packetId != -410) {
+        if (packetId < 1
+                && packetId != -400
+                && packetId != -410
+                && packetId != -411) {
             Packery.log(Level.SEVERE, this.getClass(), "No packet IDs less than 1 are permitted: Requested: {0}", packetId);
             return false;
         }
@@ -124,7 +127,10 @@ public class PacketManager {
             return true;
         }
 
-        return packetId == -400 || packetId == -410 || this.allowedPacketIds.contains(packetId);
+        return packetId == -400
+                || packetId == -410
+                || packetId == -411
+                || this.allowedPacketIds.contains(packetId);
     }
 
     public void allowPacket(long id) {
@@ -143,13 +149,14 @@ public class PacketManager {
 
     public <P extends PacketBase> void call(P packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext, ChannelIdentity authentication) {
         Packery.debug(Level.INFO, this.getClass(), "Received Packet [id=" + packet.packetId() + ";uuid=" + packet.uniqueId() + ";seasonId=" + packet.seasonId() + "] from " + authentication.namespace() + "#" + authentication.uniqueId());
-        if (packet.uniqueId() != null && this.packetRequester.waiting().containsKey(packet.uniqueId())) {
-            this.packetRequester.dispatch(packet);
-        }
 
-        if (packet instanceof RelayPacket relayPacket) {
-
-            return;
+        if (packet.uniqueId() != null) {
+            if (this.packetRequester.waiting().containsKey(packet.uniqueId())) {
+                this.packetRequester.dispatch(packet);
+            }
+            if (packet instanceof RoutingResultReplyPacket routingResultReplyPacket && this.packetRequester.waiting().containsKey(packet.uniqueId())) {
+                this.packetRouter.dispatch(routingResultReplyPacket);
+            }
         }
 
         callHandlers(packet, packetSender, channelHandlerContext);

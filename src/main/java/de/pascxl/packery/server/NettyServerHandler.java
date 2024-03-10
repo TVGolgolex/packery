@@ -25,11 +25,14 @@ package de.pascxl.packery.server;
  */
 
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.internal.PacketOutIdentityInit;
+import de.pascxl.packery.internal.PacketOutAuthentication;
+import de.pascxl.packery.internal.PacketOutIdentityActive;
+import de.pascxl.packery.internal.PacketOutIdentityInactive;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.packet.defaults.auth.AuthPacket;
-import de.pascxl.packery.packet.defaults.relay.RelayPacket;
+import de.pascxl.packery.packet.defaults.relay.RoutingPacket;
+import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
+import de.pascxl.packery.packet.router.RoutingResult;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
@@ -55,32 +58,58 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
     protected void messageReceived(ChannelHandlerContext ctx, PacketBase msg) throws Exception {
         Packery.debug(Level.INFO, this.getClass(), "messageReceived: " + msg.getClass().getSimpleName());
 
-        if (msg instanceof AuthPacket authPacket) {
+        if (msg instanceof PacketOutAuthentication authPacket) {
             if (unauthenticated.stream().anyMatch(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()))) {
                 unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
-                NettyTransmitter nettyTransmitter = new NettyTransmitter(authPacket.channelIdentity(), ctx.channel());
-                transmitters.add(nettyTransmitter);
-                Packery.debug(Level.INFO, this.getClass(), "Created new Transmitter for " + authPacket.channelIdentity().namespace() + "#" + authPacket.channelIdentity().uniqueId() + "/" + ctx.channel().remoteAddress());
+                var authenticatedTransmitter = new NettyTransmitter(authPacket.channelIdentity(), ctx.channel());
 
-                for (NettyTransmitter transmitter : transmitters) {
-                    if (transmitter.identity() != nettyTransmitter.identity()) {
-                        transmitter.sendPacketSync(new PacketOutIdentityInit(nettyTransmitter.identity()));
-                        Packery.debug(Level.INFO, this.getClass(), "Send PacketOutIdentityInit for " + authPacket.channelIdentity().namespace() + "#" + authPacket.channelIdentity().uniqueId() + "/" + ctx.channel().remoteAddress() + " to " + nettyTransmitter.identity().namespace() + "#" + nettyTransmitter.identity().uniqueId());
-                    }
+                var otherIdentities = this.transmitters.stream().map(NettyTransmitter::channelIdentity).toList();
+                Packery.debug(Level.INFO, this.getClass(), "Sending " + otherIdentities.size() + " to " + authPacket.channelIdentity());
+                ctx.channel().writeAndFlush(new PacketOutIdentityActive(authPacket.channelIdentity(), new ArrayList<>(otherIdentities)));
+
+                for (var transmitter : this.transmitters) {
+                    transmitter.sendPacketSync(new PacketOutIdentityActive(authPacket.channelIdentity()));
+                    Packery.debug(Level.INFO, this.getClass(), "Sending new Id to " + transmitter.channelIdentity());
                 }
+
+                transmitters.add(authenticatedTransmitter);
+                Packery.debug(Level.INFO, this.getClass(), "Created new Transmitter for " + authPacket.channelIdentity() + ctx.channel().remoteAddress());
             }
+            return;
+        }
+
+        if (msg instanceof RoutingPacket routingPacket) {
+            Packery.debug(Level.INFO, this.getClass(), "Received RelayPacket: " + routingPacket.getClass().getSimpleName() + " to: " + routingPacket.to() + " Transmitters: " + this.transmitters.size());
+
+            transmitters.stream()
+                    .filter(transmitter -> transmitter.channelIdentity().equals(routingPacket.to()))
+                    .findFirst()
+                    .ifPresentOrElse(transmitter -> {
+                        Packery.debug(Level.INFO, this.getClass(), "Send Packet RelayPacket: " + routingPacket.getClass().getSimpleName());
+                        transmitter.sendPacketSync(routingPacket.packet());
+                        ctx.channel().writeAndFlush(
+                                new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.SUCCESS));
+                    }, () -> {
+                        Packery.debug(Level.INFO, this.getClass(), "No Channel with Id: " + routingPacket.to() + " found.");
+                        ctx.channel().writeAndFlush(
+                                new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.FAILED_NO_CLIENT));
+                    });
             return;
         }
 
         this.transmitters
                 .stream()
-                .filter(nettyTransmitter -> nettyTransmitter.channel().remoteAddress().equals(ctx.channel().remoteAddress()))
+                .filter(transmitters -> transmitters
+                        .channel()
+                        .remoteAddress()
+                        .equals(ctx
+                                .channel()
+                                .remoteAddress()))
                 .findFirst()
-                .ifPresentOrElse(nettyTransmitter -> {
-                    this.server.packetManager.call(msg, nettyTransmitter, ctx, nettyTransmitter.identity());
-                }, () -> {
-                    Packery.debug(Level.SEVERE, this.getClass(), "No PacketSender found. Packet: " + msg.getClass().getSimpleName());
-                });
+                .ifPresentOrElse(
+                        transmitter -> this.server.packetManager.call(msg, transmitter, ctx, transmitter.channelIdentity()),
+                        () -> Packery.debug(Level.SEVERE, this.getClass(), "No PacketSender found. Packet: " + msg.getClass().getSimpleName())
+                );
     }
 
     @Override
@@ -88,6 +117,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
         if ((!ctx.channel().isActive() || !ctx.channel().isOpen() || !ctx.channel().isWritable())) {
             Packery.LOGGER.log(Level.INFO, "Channel inactive: " + ctx.channel().remoteAddress());
             unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
+            for (var transmitter : transmitters) {
+                if (!transmitter.channel().remoteAddress().equals(ctx.channel().remoteAddress())) {
+                    transmitter.sendPacketSync(new PacketOutIdentityInactive(transmitter.channelIdentity()));
+                    Packery.debug(Level.INFO, this.getClass(), "Send PacketOutIdentityInit for " + ctx.channel().remoteAddress() + " to " + transmitter.channelIdentity().namespace() + "#" + transmitter.channelIdentity().uniqueId());
+                }
+            }
+            transmitters.removeIf(nettyTransmitter -> nettyTransmitter.channel().remoteAddress().equals(ctx.channel().remoteAddress()));
             ctx.close();
         }
     }

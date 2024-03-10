@@ -37,17 +37,19 @@ public abstract class AbstractIdentityPacket extends PacketBase {
 
     public AbstractIdentityPacket(long packetId, @NonNull ChannelIdentity channelIdentity) {
         super(packetId);
+        this.channelIdentity = channelIdentity;
     }
 
     @Override
     public void write(ByteBuffer out) {
-        out.writeString(channelIdentity.namespace())
-                .writeUUID(channelIdentity.uniqueId());
+        out.writeString(channelIdentity.namespace()).writeUUID(channelIdentity.uniqueId());
+        writeCustom(out);
     }
 
     @Override
     public void read(ByteBuffer in) {
         this.channelIdentity = new ChannelIdentity(in.readString(), in.readUUID());
+        readCustom(in);
     }
 
     public abstract void writeCustom(ByteBuffer byteBuffer);

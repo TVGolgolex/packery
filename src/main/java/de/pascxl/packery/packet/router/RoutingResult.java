@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.relay;
+package de.pascxl.packery.packet.router;
 
 /*
  * MIT License
@@ -24,8 +24,10 @@ package de.pascxl.packery.packet.relay;
  * SOFTWARE.
  */
 
-public enum RelayResult {
+public enum RoutingResult {
     FAILED_UNKNOWN,
     FAILED_NO_CLIENT,
-    SUCCESS
+    SUCCESS,
+    NO_RESULT,
+    IDLE
 }

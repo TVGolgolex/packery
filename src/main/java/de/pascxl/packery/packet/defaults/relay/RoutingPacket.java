@@ -28,21 +28,22 @@ import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.packet.defaults.request.RequestPacket;
 import de.pascxl.packery.utils.Allocator;
+import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.logging.Level;
 
-public class RelayPacket extends RequestPacket {
+@Getter
+public class RoutingPacket extends PacketBase {
 
     private PacketBase packet;
-    private ChannelIdentity channelIdentity;
+    private ChannelIdentity to;
 
-    public RelayPacket(long packetId, @NonNull PacketBase packet, @NonNull ChannelIdentity channelIdentity) {
+    public RoutingPacket(long packetId, @NonNull PacketBase packet, @NonNull ChannelIdentity to) {
         super(packetId);
         this.packet = packet;
-        this.channelIdentity = channelIdentity;
+        this.to = to;
     }
 
     @Override
@@ -51,28 +52,28 @@ public class RelayPacket extends RequestPacket {
             Packery.log(Level.SEVERE, this.getClass(), "Cannot send RelayPacket because Packet is null");
             return;
         }
-        if (channelIdentity == null) {
+        if (to == null) {
             Packery.log(Level.SEVERE, this.getClass(), "Cannot send RelayPacket because ChannelIdentity is null");
             return;
         }
-        if (channelIdentity.namespace() == null) {
+        if (to.namespace() == null) {
             Packery.log(Level.SEVERE, this.getClass(), "Cannot send RelayPacket because ChannelIdentity#namespace is null");
             return;
         }
-        if (channelIdentity.uniqueId() == null) {
+        if (to.uniqueId() == null) {
             Packery.log(Level.SEVERE, this.getClass(), "Cannot send RelayPacket because ChannelIdentity#uniqueId is null");
             return;
         }
 
-        out.writeString(channelIdentity.namespace())
-                .writeUUID(channelIdentity.uniqueId());
+        out.writeString(to.namespace())
+                .writeUUID(to.uniqueId());
         out.writeString(packet.getClass().getName());
         packet.write(out);
     }
 
     @Override
     public void read(ByteBuffer in) {
-        this.channelIdentity = new ChannelIdentity(in.readString(), in.readUUID());
+        this.to = new ChannelIdentity(in.readString(), in.readUUID());
         try {
             var packetClass = Class.forName(in.readString());
             this.packet = (PacketBase) Allocator.allocate(packetClass);

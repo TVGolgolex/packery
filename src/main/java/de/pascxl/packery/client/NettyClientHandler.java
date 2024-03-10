@@ -25,8 +25,12 @@ package de.pascxl.packery.client;
  */
 
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.internal.PacketOutIdentityInit;
+import de.pascxl.packery.internal.PacketOutAuthentication;
+import de.pascxl.packery.internal.PacketOutIdentityActive;
+import de.pascxl.packery.internal.PacketOutIdentityInactive;
+import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
@@ -43,20 +47,42 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> 
     protected void messageReceived(ChannelHandlerContext ctx, PacketBase msg) throws Exception {
         Packery.debug(Level.INFO, this.getClass(), "messageReceived: " + msg.getClass().getSimpleName());
 
-        if (msg instanceof PacketOutIdentityInit packet) {
-            if (client.channelIdentities().stream().noneMatch(channelIdentity -> channelIdentity.uniqueId().equals(packet.channelIdentity().uniqueId()))) {
-                client.channelIdentities().add(packet.channelIdentity());
-                Packery.debug(Level.INFO, this.getClass(), "Initialized Channel-Identity: "u);
+        if (msg instanceof PacketOutIdentityActive activePacket) {
+            Packery.debug(Level.INFO, this.getClass(), "PacketOutIdentityActive Channel-Identity: {0}", activePacket.channelIdentity());
+            if (activePacket.other() != null) {
+                Packery.debug(Level.INFO, this.getClass(), "PacketOutIdentityActive init other Ids");
+                for (var channelIdentity : activePacket.other()) {
+                    client.channelIdentities().add(channelIdentity);
+                    Packery.debug(Level.INFO, this.getClass(), "Cached id: " + channelIdentity);
+                }
+                return;
             }
+            Packery.debug(Level.INFO, this.getClass(), "PacketOutIdentityActive init Id");
+            client.channelIdentities().add(activePacket.channelIdentity());
+            Packery.debug(Level.INFO, this.getClass(), "Cached id: " + activePacket.channelIdentity());
             return;
         }
 
-        this.client.packetManager.call(msg, this.client.nettyTransmitter(), ctx, this.client.channelIdentity());
+        if (msg instanceof PacketOutIdentityInactive inactive) {
+            if (client.channelIdentities().stream().anyMatch(channelIdentity -> channelIdentity.equals(inactive.channelIdentity()))) {
+                client.channelIdentities().removeIf(channelIdentity -> channelIdentity.equals(inactive.channelIdentity()));
+                Packery.debug(Level.INFO, this.getClass(), "Stopped Channel-Identity: {0}", inactive.channelIdentity().namespace() + "#" + inactive.channelIdentity().uniqueId());
+            }
+        }
+
+        if (msg instanceof RoutingResultReplyPacket routingResultReplyPacket) {
+            Packery.debug(Level.INFO, this.getClass(), "Received RelayReplyPacket");
+            Packery.debug(Level.INFO, this.getClass(), "Received RelayReplyPacket UUID: " + routingResultReplyPacket.uniqueId());
+            this.client.packetManager().packetRouter().dispatch(routingResultReplyPacket);
+        }
+
+        this.client.packetManager().call(msg, this.client.nettyTransmitter(), ctx, this.client.channelIdentity());
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        this.client.nettyTransmitter().channel(ctx.channel());
+        this.client.nettyTransmitter = new NettyTransmitter(this.client.channelIdentity(), ctx.channel());
+        this.client.nettyTransmitter().channel().writeAndFlush(new PacketOutAuthentication(this.client.channelIdentity()));
     }
 
     @Override

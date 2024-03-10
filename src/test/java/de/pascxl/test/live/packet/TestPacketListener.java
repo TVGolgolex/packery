@@ -1,9 +1,4 @@
-package de.pascxl.packery.packet.request;
-
-import de.pascxl.packery.packet.PacketBase;
-
-
-import java.util.UUID;
+package de.pascxl.test.live.packet;
 
 /*
  * MIT License
@@ -29,5 +24,18 @@ import java.util.UUID;
  * SOFTWARE.
  */
 
-public record Respond<P extends PacketBase>(UUID uniqueId, P resultPacket) {
+import com.google.gson.JsonElement;
+import de.pascxl.packery.packet.listener.PacketReceiveListener;
+import de.pascxl.packery.packet.sender.PacketSender;
+import io.netty5.channel.ChannelHandlerContext;
+
+import java.util.Map;
+
+public class TestPacketListener extends PacketReceiveListener<TestPacket> {
+    @Override
+    public void call(TestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext) {
+        for (Map.Entry<String, JsonElement> stringJsonElementEntry : packet.jsonDocument().jsonObject().entrySet()) {
+            System.out.println(stringJsonElementEntry.getKey() + ": " + stringJsonElementEntry.getValue().toString());
+        }
+    }
 }

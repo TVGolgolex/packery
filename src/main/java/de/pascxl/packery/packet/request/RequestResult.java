@@ -1,4 +1,9 @@
-package de.pascxl.packery.internal;
+package de.pascxl.packery.packet.request;
+
+import de.pascxl.packery.packet.PacketBase;
+
+
+import java.util.UUID;
 
 /*
  * MIT License
@@ -24,23 +29,5 @@ package de.pascxl.packery.internal;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.network.ChannelIdentity;
-import lombok.NonNull;
-
-public class PacketOutIdentityInit extends AbstractIdentityPacket {
-
-    public PacketOutIdentityInit(@NonNull ChannelIdentity channelIdentity) {
-        super(-410, channelIdentity);
-    }
-
-    @Override
-    public void writeCustom(ByteBuffer byteBuffer) {
-
-    }
-
-    @Override
-    public void readCustom(ByteBuffer byteBuffer) {
-
-    }
+public record RequestResult<P extends PacketBase>(UUID uniqueId, P resultPacket) {
 }

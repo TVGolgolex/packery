@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.defaults.auth;
+package de.pascxl.packery.internal;
 
 /*
  * MIT License
@@ -26,27 +26,21 @@ package de.pascxl.packery.packet.defaults.auth;
 
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.network.ChannelIdentity;
-import de.pascxl.packery.packet.PacketBase;
-import lombok.Getter;
+import lombok.NonNull;
 
-@Getter
-public class AuthPacket extends PacketBase {
+public class PacketOutIdentityInactive extends AbstractIdentityPacket {
 
-    private ChannelIdentity channelIdentity;
-
-    public AuthPacket(ChannelIdentity channelIdentity) {
-        super(-400);
-        this.channelIdentity = channelIdentity;
+    public PacketOutIdentityInactive(@NonNull ChannelIdentity channelIdentity) {
+        super(-411, channelIdentity);
     }
 
     @Override
-    public void write(ByteBuffer out) {
-        out.writeString(channelIdentity.namespace());
-        out.writeUUID(channelIdentity.uniqueId());
+    public void writeCustom(ByteBuffer byteBuffer) {
+
     }
 
     @Override
-    public void read(ByteBuffer in) {
-        channelIdentity = new ChannelIdentity(in.readString(), in.readUUID());
+    public void readCustom(ByteBuffer byteBuffer) {
+
     }
 }

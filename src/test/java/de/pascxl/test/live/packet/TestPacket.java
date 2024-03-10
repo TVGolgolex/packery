@@ -1,7 +1,4 @@
-package de.pascxl.packery.network;
-
-import java.util.Objects;
-import java.util.UUID;
+package de.pascxl.test.live.packet;
 
 /*
  * MIT License
@@ -26,29 +23,12 @@ import java.util.UUID;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public record ChannelIdentity(String namespace, UUID uniqueId) {
 
-    public String toString() {
-        return namespace + "#" + uniqueId;
-    }
+import de.pascxl.packery.packet.defaults.document.JsonDocument;
+import de.pascxl.packery.packet.defaults.document.JsonPacket;
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-
-        ChannelIdentity channelIdentity = (ChannelIdentity) obj;
-
-        return this.namespace.equalsIgnoreCase(channelIdentity.namespace()) && this.uniqueId.equals(channelIdentity.uniqueId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(namespace, uniqueId);
+public class TestPacket extends JsonPacket {
+    public TestPacket(long packetId, JsonDocument jsonDocument) {
+        super(packetId, jsonDocument);
     }
 }

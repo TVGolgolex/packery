@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.relay;
+package de.pascxl.packery.internal;
 
 /*
  * MIT License
@@ -24,26 +24,24 @@ package de.pascxl.packery.packet.relay;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.network.NettyTransmitter;
-import de.pascxl.packery.packet.defaults.relay.RelayPacket;
-import de.pascxl.packery.packet.request.PacketRequester;
-import lombok.AccessLevel;
+import de.pascxl.packery.buffer.ByteBuffer;
+import de.pascxl.packery.network.ChannelIdentity;
 import lombok.Getter;
 
-public class PacketRouter {
+@Getter
+public class PacketOutAuthentication extends AbstractIdentityPacket {
 
-    @Getter(AccessLevel.NONE)
-    private final PacketRequester packetRequester;
-
-    public PacketRouter(PacketRequester packetRequester) {
-        this.packetRequester = packetRequester;
+    public PacketOutAuthentication(ChannelIdentity channelIdentity) {
+        super(-400, channelIdentity);
     }
 
-    public void relayPacket(RelayPacket relayPacket, NettyTransmitter transmitter) {
-        var respond = packetRequester.query(relayPacket, transmitter);
-
-
+    @Override
+    public void writeCustom(ByteBuffer byteBuffer) {
 
     }
 
+    @Override
+    public void readCustom(ByteBuffer byteBuffer) {
+
+    }
 }

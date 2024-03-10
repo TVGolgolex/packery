@@ -29,7 +29,6 @@ import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketManager;
-import de.pascxl.packery.packet.defaults.auth.AuthPacket;
 import de.pascxl.packery.utils.NettyUtils;
 import de.pascxl.packery.utils.StringUtils;
 import io.netty5.bootstrap.Bootstrap;
@@ -110,8 +109,6 @@ public class NettyClient implements AutoCloseable {
             return false;
         }
 
-        this.nettyTransmitter = new NettyTransmitter(this.channelIdentity, initThread.channel());
-        this.nettyTransmitter.channel().writeAndFlush(new AuthPacket(this.channelIdentity));
         connected = true;
         return true;
     }

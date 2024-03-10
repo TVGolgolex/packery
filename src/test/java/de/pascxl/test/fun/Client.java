@@ -69,17 +69,17 @@ public class Client {
 
         TestRequestPacket testRequestPacket = new TestRequestPacket("test");
 
-        TestPacket result = (TestPacket) nettyClient.packetManager()
+        nettyClient.packetManager()
                 .packetRequester()
-                .query(testRequestPacket, nettyClient.nettyTransmitter())
-                .packet();
+                .queryFuture(testRequestPacket, nettyClient.nettyTransmitter())
+                .whenComplete((respondPacket, throwable) -> {
+                    if (respondPacket == null) {
+                        System.out.println("result is null");
+                        return;
+                    }
 
-        if (result == null) {
-            System.out.println("result is null");
-            return;
-        }
-
-        System.out.println(result.jsonDocument().readString("test"));
+                    System.out.println(((TestPacket) respondPacket.packet()).jsonDocument().readString("test"));
+                });
 
     }
 }

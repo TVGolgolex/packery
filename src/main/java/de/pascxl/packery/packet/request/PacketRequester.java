@@ -30,32 +30,53 @@ import de.pascxl.packery.packet.PacketManager;
 import de.pascxl.packery.packet.defaults.request.RequestPacket;
 import de.pascxl.packery.packet.defaults.request.RespondPacket;
 import de.pascxl.packery.utils.Value;
+import de.pascxl.packery.utils.scheduler.TaskScheduler;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class PacketRequester {
 
     private final PacketManager packetManager;
-    private final Map<UUID, Value<Respond<?>>> waiting = new ConcurrentHashMap<>(0);
+    private final Map<UUID, Value<RequestResult<?>>> waiting = new ConcurrentHashMap<>(0);
+    private final TaskScheduler executorService = new TaskScheduler(1);
 
     public PacketRequester(PacketManager packetManager) {
         this.packetManager = packetManager;
     }
 
-    public <P extends RequestPacket, PR extends PacketBase> RespondPacket query(P packet, NettyTransmitter nettyTransmitter) {
-        var queryUUID = UUID.randomUUID();
-        packet.uniqueId(queryUUID);
+    public <P extends RequestPacket> CompletableFuture<RespondPacket> queryFuture(P packet, NettyTransmitter transmitter) {
+        var packetUniqueId = UUID.randomUUID();
+        packet.uniqueId(packetUniqueId);
 
-        Value<Respond<?>> handled = new Value<>(null);
-        waiting.put(queryUUID, handled);
-        nettyTransmitter.sendPacketAsync(packet);
+        var resultFuture = new CompletableFuture<RespondPacket>();
+        Value<RequestResult<?>> value = new Value<>(null);
+        waiting.put(packetUniqueId, value);
+        transmitter.sendPacketAsync(packet);
+
+        executorService.schedule(() -> {
+            Value<RequestResult<?>> resultValue = waiting.get(packetUniqueId);
+            waiting.remove(packetUniqueId);
+            resultFuture.complete(resultValue != null && resultValue.entry() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null);
+        }, 5000);
+        return resultFuture;
+    }
+
+    public <P extends RequestPacket> RespondPacket queryUnsafe(P packet, NettyTransmitter transmitter) {
+        var packetUniqueId = UUID.randomUUID();
+        packet.uniqueId(packetUniqueId);
+
+        Value<RequestResult<?>> value = new Value<>(null);
+        waiting.put(packetUniqueId, value);
+        transmitter.sendPacketAsync(packet);
 
         int i = 0;
 
-        while (waiting.get(queryUUID).entry() == null && i++ < 5000) {
+        while (waiting.get(packetUniqueId).entry() == null && i++ < 5000) {
             try {
                 Thread.sleep(0, 500000);
             } catch (InterruptedException ignored) {
@@ -63,22 +84,22 @@ public class PacketRequester {
         }
 
         if (i >= 4999) {
-            waiting.get(queryUUID).entry(new Respond<>(queryUUID, null));
+            waiting.get(packetUniqueId).entry(new RequestResult<>(packetUniqueId, null));
         }
 
-        Value<Respond<?>> resultValue = waiting.get(queryUUID);
-        waiting.remove(queryUUID);
+        Value<RequestResult<?>> resultValue = waiting.get(packetUniqueId);
+        waiting.remove(packetUniqueId);
         return resultValue != null && resultValue.entry() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null;
     }
 
     @SuppressWarnings("unchecked")
-    private <PR extends PacketBase> Respond<PR> castResult(Value<Respond<?>> resultValue) {
-        return (Respond<PR>) resultValue.entry();
+    private <PR extends PacketBase> RequestResult<PR> castResult(Value<RequestResult<?>> resultValue) {
+        return (RequestResult<PR>) resultValue.entry();
     }
 
     public void dispatch(PacketBase packet) {
-        Respond<PacketBase> respond = new Respond<>(packet.uniqueId(), packet);
-        Value<Respond<?>> waitingQuery = waiting.get(packet.uniqueId());
-        waitingQuery.entry(respond);
+        RequestResult<PacketBase> requestResult = new RequestResult<>(packet.uniqueId(), packet);
+        Value<RequestResult<?>> waitingQuery = waiting.get(packet.uniqueId());
+        waitingQuery.entry(requestResult);
     }
 }
