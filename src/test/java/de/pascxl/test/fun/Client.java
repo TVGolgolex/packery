@@ -28,8 +28,8 @@ import de.golgolex.quala.json.document.JsonDocument;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
-import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.ChannelIdentity;
+import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.packet.queue.PacketQueue;
 import de.pascxl.test.fun.test.TestPacket;
 import de.pascxl.test.fun.test.respond.TestRequestPacket;
@@ -69,7 +69,19 @@ public class Client {
 
         TestRequestPacket testRequestPacket = new TestRequestPacket("test");
 
-        nettyClient.packetManager()
+        var respondPacket = nettyClient.packetManager()
+                .packetRequester()
+                .queryUnsafe(testRequestPacket, nettyClient.nettyTransmitter());
+
+        if (respondPacket == null)
+        {
+            System.out.println("result is null");
+            return;
+        }
+
+        System.out.println(((TestPacket) respondPacket.packet()).jsonDocument().readString("test"));
+
+/*        nettyClient.packetManager()
                 .packetRequester()
                 .queryFuture(testRequestPacket, nettyClient.nettyTransmitter())
                 .whenComplete((respondPacket, throwable) -> {
@@ -79,7 +91,7 @@ public class Client {
                     }
 
                     System.out.println(((TestPacket) respondPacket.packet()).jsonDocument().readString("test"));
-                });
+                });*/
 
     }
 }

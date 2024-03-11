@@ -24,7 +24,9 @@ package de.pascxl.test.fun.test.respond;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.Quala;
 import de.golgolex.quala.json.document.JsonDocument;
+import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.packet.listener.PacketRespondListener;
 import de.pascxl.packery.packet.sender.PacketSender;
 import de.pascxl.test.fun.test.TestPacket;
@@ -36,7 +38,7 @@ public class TestRequestPacketListener extends PacketRespondListener<TestRequest
     {
         TestPacket testPacket = new TestPacket(packetId, new JsonDocument());
 
-        testPacket.jsonDocument().write("test", packet.message());
+        testPacket.jsonDocument().write("test", packet.message() + StringUtils.generateRandomString(98));
 
         respond(buildRespond(testPacket), packetSender);
     }
