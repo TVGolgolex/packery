@@ -24,13 +24,13 @@ package de.pascxl.packery.packet.request;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.scheduler.Scheduler;
+import de.golgolex.quala.utils.data.Value;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.PacketManager;
 import de.pascxl.packery.packet.defaults.request.RequestPacket;
 import de.pascxl.packery.packet.defaults.request.RespondPacket;
-import de.pascxl.packery.utils.Value;
-import de.pascxl.packery.utils.scheduler.TaskScheduler;
 import lombok.Getter;
 
 import java.util.Map;
@@ -43,7 +43,7 @@ public class PacketRequester {
 
     private final PacketManager packetManager;
     private final Map<UUID, Value<RequestResult<?>>> waiting = new ConcurrentHashMap<>(0);
-    private final TaskScheduler executorService = new TaskScheduler(1);
+    private final Scheduler executorService = new Scheduler(1);
 
     public PacketRequester(PacketManager packetManager) {
         this.packetManager = packetManager;
@@ -61,7 +61,7 @@ public class PacketRequester {
         executorService.schedule(() -> {
             Value<RequestResult<?>> resultValue = waiting.get(packetUniqueId);
             waiting.remove(packetUniqueId);
-            resultFuture.complete(resultValue != null && resultValue.entry() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null);
+            resultFuture.complete(resultValue != null && resultValue.value() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null);
         }, 5000);
         return resultFuture;
     }
@@ -76,7 +76,7 @@ public class PacketRequester {
 
         int i = 0;
 
-        while (waiting.get(packetUniqueId).entry() == null && i++ < 5000) {
+        while (waiting.get(packetUniqueId).value() == null && i++ < 5000) {
             try {
                 Thread.sleep(0, 500000);
             } catch (InterruptedException ignored) {
@@ -84,22 +84,22 @@ public class PacketRequester {
         }
 
         if (i >= 4999) {
-            waiting.get(packetUniqueId).entry(new RequestResult<>(packetUniqueId, null));
+            waiting.get(packetUniqueId).value(new RequestResult<>(packetUniqueId, null));
         }
 
         Value<RequestResult<?>> resultValue = waiting.get(packetUniqueId);
         waiting.remove(packetUniqueId);
-        return resultValue != null && resultValue.entry() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null;
+        return resultValue != null && resultValue.value() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null;
     }
 
     @SuppressWarnings("unchecked")
     private <PR extends PacketBase> RequestResult<PR> castResult(Value<RequestResult<?>> resultValue) {
-        return (RequestResult<PR>) resultValue.entry();
+        return (RequestResult<PR>) resultValue.value();
     }
 
     public void dispatch(PacketBase packet) {
         RequestResult<PacketBase> requestResult = new RequestResult<>(packet.uniqueId(), packet);
         Value<RequestResult<?>> waitingQuery = waiting.get(packet.uniqueId());
-        waitingQuery.entry(requestResult);
+        waitingQuery.value(requestResult);
     }
 }

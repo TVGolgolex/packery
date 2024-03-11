@@ -24,11 +24,11 @@ package de.pascxl.packery.packet.defaults.relay;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.reflections.Allocator;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.utils.Allocator;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -76,7 +76,7 @@ public class RoutingPacket extends PacketBase {
         this.to = new ChannelIdentity(in.readString(), in.readUUID());
         try {
             var packetClass = Class.forName(in.readString());
-            this.packet = (PacketBase) Allocator.allocate(packetClass);
+            this.packet = (PacketBase) Allocator.unsafeAllocation(packetClass);
 
             if (packet == null) {
                 Packery.log(Level.SEVERE, this.getClass(), "Packet cannot be allocated");

@@ -24,10 +24,10 @@ package de.pascxl.packery.packet.queue;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.scheduler.Scheduler;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.sender.PacketSender;
-import de.pascxl.packery.utils.scheduler.TaskScheduler;
 import lombok.NonNull;
 
 import java.util.LinkedList;
@@ -55,7 +55,7 @@ public class PacketQueue {
             Packery.log(Level.SEVERE, this.getClass(), "Sending already started");
             return;
         }
-        TaskScheduler.runtimeScheduler().schedule(() -> {
+        Scheduler.runtimeScheduler().schedule(() -> {
             Packery.debug(Level.INFO, this.getClass(), "Starting sending ");
             if (queue.isEmpty()) {
                 Packery.log(Level.SEVERE, this.getClass(), "Cannot start sending because the queue is empty");

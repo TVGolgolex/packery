@@ -24,11 +24,11 @@ package de.pascxl.packery.packet.router;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.scheduler.Scheduler;
+import de.golgolex.quala.utils.data.Value;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.defaults.relay.RoutingPacket;
 import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
-import de.pascxl.packery.utils.Value;
-import de.pascxl.packery.utils.scheduler.TaskScheduler;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -41,7 +41,7 @@ public class PacketRouter {
 
     @Getter(AccessLevel.NONE)
     private final Map<UUID, Value<RoutingResult>> result = new ConcurrentHashMap<>(0);
-    private final TaskScheduler executorService = new TaskScheduler(1);
+    private final Scheduler executorService = new Scheduler(1);
 
     public CompletableFuture<RoutingResult> routeFuture(RoutingPacket routingPacket, NettyTransmitter transmitter) {
         var packetUniqueId = UUID.randomUUID();
@@ -53,7 +53,7 @@ public class PacketRouter {
         transmitter.sendPacketAsync(routingPacket);
 
         executorService.schedule(() -> {
-            RoutingResult finalResult = result.get(packetUniqueId).entry();
+            RoutingResult finalResult = result.get(packetUniqueId).value();
             result.remove(packetUniqueId);
             resultFuture.complete(finalResult);
         }, 5000);
@@ -70,7 +70,7 @@ public class PacketRouter {
 
         int i = 0;
 
-        while (result.get(packetUniqueId).entry() == RoutingResult.IDLE && i++ < 5000) {
+        while (result.get(packetUniqueId).value() == RoutingResult.IDLE && i++ < 5000) {
             try {
                 Thread.sleep(0, 500000);
             } catch (InterruptedException ignored) {
@@ -78,17 +78,17 @@ public class PacketRouter {
         }
 
         if (i >= 4999) {
-            result.get(packetUniqueId).entry(RoutingResult.NO_RESULT);
+            result.get(packetUniqueId).value(RoutingResult.NO_RESULT);
         }
 
         Value<RoutingResult> resultValue = result.get(packetUniqueId);
         result.remove(packetUniqueId);
-        return resultValue == null ? null : resultValue.entry() == null ? null : resultValue.entry();
+        return resultValue == null ? null : resultValue.value() == null ? null : resultValue.value();
     }
 
     public void dispatch(RoutingResultReplyPacket routingResultReplyPacket) {
         var resultValue = result.get(routingResultReplyPacket.uniqueId());
-        resultValue.entry(routingResultReplyPacket.routingResult());
+        resultValue.value(routingResultReplyPacket.routingResult());
     }
 
 }

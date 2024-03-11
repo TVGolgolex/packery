@@ -25,6 +25,12 @@
     <dependencies>
         <dependency>
             <groupId>com.github.golgolex</groupId>
+            <artifactId>quala</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.golgolex</groupId>
             <artifactId>eventum</artifactId>
             <version>1.0.0</version>
             <scope>compile</scope>

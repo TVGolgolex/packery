@@ -24,15 +24,15 @@ package de.pascxl.test.fun;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.json.document.JsonDocument;
+import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.ChannelIdentity;
-import de.pascxl.packery.packet.defaults.document.JsonDocument;
 import de.pascxl.packery.packet.queue.PacketQueue;
 import de.pascxl.test.fun.test.TestPacket;
 import de.pascxl.test.fun.test.respond.TestRequestPacket;
-import de.pascxl.packery.utils.StringUtils;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

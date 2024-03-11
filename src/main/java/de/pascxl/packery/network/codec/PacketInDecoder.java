@@ -24,11 +24,11 @@ package de.pascxl.packery.network.codec;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.reflections.Allocator;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.PacketManager;
-import de.pascxl.packery.utils.Allocator;
 import io.netty5.buffer.Buffer;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.handler.codec.ByteToMessageDecoder;
@@ -49,7 +49,7 @@ public class PacketInDecoder extends ByteToMessageDecoder {
         try {
             var packetClassName = byteBuffer.readString();
             var packetClass = Class.forName(packetClassName);
-            var packetInstance = (PacketBase) Allocator.allocate(packetClass);
+            var packetInstance = (PacketBase) Allocator.unsafeAllocation(packetClass);
 
             if (packetInstance == null) {
                 Packery.log(Level.SEVERE, this.getClass(), "PacketInstance is null");

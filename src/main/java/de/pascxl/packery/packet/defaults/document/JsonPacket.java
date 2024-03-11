@@ -25,9 +25,10 @@ package de.pascxl.packery.packet.defaults.document;
  */
 
 import com.google.gson.JsonObject;
+import de.golgolex.quala.json.JsonUtils;
+import de.golgolex.quala.json.document.JsonDocument;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.utils.JsonUtils;
 import lombok.Getter;
 
 import java.util.UUID;

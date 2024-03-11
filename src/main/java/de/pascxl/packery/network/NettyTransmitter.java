@@ -24,9 +24,9 @@ package de.pascxl.packery.network;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.utils.executors.ExecutionUtils;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.sender.PacketSender;
-import de.pascxl.packery.utils.ExecutionUtils;
 import io.netty5.channel.Channel;
 import lombok.Getter;
 import lombok.Setter;

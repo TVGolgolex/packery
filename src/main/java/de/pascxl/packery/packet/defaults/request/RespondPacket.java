@@ -24,10 +24,10 @@ package de.pascxl.packery.packet.defaults.request;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.reflections.Allocator;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.utils.Allocator;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -56,7 +56,7 @@ public class RespondPacket extends PacketBase {
     {
         try {
             var packetClass = Class.forName(in.readString());
-            this.packet = (PacketBase) Allocator.allocate(packetClass);
+            this.packet = (PacketBase) Allocator.unsafeAllocation(packetClass);
 
             if (packet == null) {
                 Packery.log(Level.SEVERE, this.getClass(), "Packet cannot be allocated");

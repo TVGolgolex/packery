@@ -24,13 +24,13 @@ package de.pascxl.packery.client;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.NettyTransmitter;
 import de.pascxl.packery.packet.PacketManager;
 import de.pascxl.packery.utils.NettyUtils;
-import de.pascxl.packery.utils.StringUtils;
 import io.netty5.bootstrap.Bootstrap;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelOption;

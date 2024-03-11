@@ -16,14 +16,14 @@ package de.pascxl.test.live;
  * limitations under the License.
  */
 
+import de.golgolex.quala.json.document.JsonDocument;
+import de.golgolex.quala.scheduler.Scheduler;
+import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.InactiveAction;
-import de.pascxl.packery.packet.defaults.document.JsonDocument;
 import de.pascxl.packery.packet.defaults.relay.RoutingPacket;
-import de.pascxl.packery.utils.StringUtils;
-import de.pascxl.packery.utils.scheduler.TaskScheduler;
 import de.pascxl.test.fun.test.TestPacket;
 
 import java.util.UUID;
@@ -44,7 +44,7 @@ public class LiveClientOne {
         nettyClient.packetManager().allowPacket(774090777346262697L);
 
 
-        TaskScheduler.runtimeScheduler().schedule(() -> {
+        Scheduler.runtimeScheduler().schedule(() -> {
             TestPacket testPacket = new TestPacket(2, new JsonDocument());
             for (int i = 0; i < 30; i++) {
                 testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));

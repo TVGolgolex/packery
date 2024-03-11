@@ -24,7 +24,7 @@ package de.pascxl.test.live.packet;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.defaults.document.JsonDocument;
+import de.golgolex.quala.json.document.JsonDocument;
 import de.pascxl.packery.packet.defaults.document.JsonPacket;
 
 public class TestPacket extends JsonPacket {
