@@ -27,6 +27,7 @@ package de.pascxl.packery.packet.queue;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.sender.PacketSender;
+import de.pascxl.packery.utils.scheduler.TaskScheduler;
 import lombok.NonNull;
 
 import java.util.LinkedList;
@@ -49,64 +50,24 @@ public class PacketQueue {
         return this;
     }
 
-    public void sendDelaySync(int delay, TimeUnit timeUnit) {
+    public void sendDelay(int delay, TimeUnit timeUnit, Threading threading) {
         if (sending) {
             Packery.log(Level.SEVERE, this.getClass(), "Sending already started");
             return;
         }
-
-        new Thread(() -> {
-            if (queue.isEmpty()) {
-                Packery.log(Level.SEVERE, this.getClass(), "Cannot start sending because the queue is empty");
-                return;
-            }
-            sending = true;;
-
-            var delayMillis = timeUnit.toMillis(delay);
-            var startTime = System.currentTimeMillis();
-
-            while (System.currentTimeMillis() - startTime < delayMillis) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
-                }
-            }
-
-            while (!queue.isEmpty()) {
-                packetSender.sendPacketSync(queue.poll());
-            }
-            sending = false;
-        }).start();
-    }
-
-    public void sendDelayAsync(int delay, TimeUnit timeUnit) {
-        if (sending) {
-            Packery.log(Level.SEVERE, this.getClass(), "Sending already started");
-            return;
-        }
-
-        new Thread(() -> {
+        TaskScheduler.runtimeScheduler().schedule(() -> {
             Packery.debug(Level.INFO, this.getClass(), "Starting sending ");
             if (queue.isEmpty()) {
                 Packery.log(Level.SEVERE, this.getClass(), "Cannot start sending because the queue is empty");
                 return;
             }
             sending = true;
-
-            var delayMillis = timeUnit.toMillis(delay);
-            var startTime = System.currentTimeMillis();
-
-            while (System.currentTimeMillis() - startTime < delayMillis) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
-                }
-            }
-
             while (!queue.isEmpty()) {
-                packetSender.sendPacketAsync(queue.poll());
+                switch (threading) {
+                    case SYNC -> packetSender.sendPacketSync(queue.poll());
+                    case ASYNC -> packetSender.sendPacketAsync(queue.poll());
+                    case UNSET -> packetSender.sendPacket(queue.poll());
+                }
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -114,6 +75,38 @@ public class PacketQueue {
                 }
             }
             sending = false;
-        }).start();
+        }, timeUnit.toMillis(delay));
+    }
+
+    public void send(Threading threading) {
+        if (sending) {
+            Packery.log(Level.SEVERE, this.getClass(), "Sending already started");
+            return;
+        }
+        Packery.debug(Level.INFO, this.getClass(), "Starting sending ");
+        if (queue.isEmpty()) {
+            Packery.log(Level.SEVERE, this.getClass(), "Cannot start sending because the queue is empty");
+            return;
+        }
+        sending = true;
+        while (!queue.isEmpty()) {
+            switch (threading) {
+                case SYNC -> packetSender.sendPacketSync(queue.poll());
+                case ASYNC -> packetSender.sendPacketAsync(queue.poll());
+                case UNSET -> packetSender.sendPacket(queue.poll());
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
+            }
+        }
+        sending = false;
+    }
+
+    public enum Threading {
+        UNSET,
+        ASYNC,
+        SYNC
     }
 }

@@ -70,6 +70,14 @@ public class NettyTransmitter extends PacketSender {
     }
 
     @Override
+    public <P extends PacketBase> void sendPacket(P packet) {
+        if (!(channel != null && channel.isOpen())) {
+            return;
+        }
+        channel.writeAndFlush(packet);
+    }
+
+    @Override
     public <P extends PacketBase> void sendPacketSync(P packet) {
         if (!(channel != null && channel.isOpen())) {
             return;

@@ -39,6 +39,8 @@ public abstract class PacketSender {
 
     public abstract <P extends PacketBase> void sendPacketAsync(P packet);
 
+    public abstract <P extends PacketBase> void sendPacket(P packet);
+
     public abstract <P extends PacketBase> void sendPacketSync(P packet);
 
 }

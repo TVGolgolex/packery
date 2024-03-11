@@ -57,7 +57,7 @@ public class Client {
             packetQueue.addPacket(testPacket);
         }
 
-        packetQueue.sendDelayAsync(10, TimeUnit.SECONDS);
+        packetQueue.sendDelay(10, TimeUnit.SECONDS, PacketQueue.Threading.ASYNC);
 
         TestPacket testPacket = new TestPacket(4, new JsonDocument());
 
