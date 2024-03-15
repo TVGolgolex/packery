@@ -25,11 +25,14 @@ package de.pascxl.packery.network;
  */
 
 import de.golgolex.quala.utils.executors.ExecutionUtils;
+import de.pascxl.packery.Packery;
 import de.pascxl.packery.packet.PacketBase;
 import de.pascxl.packery.packet.sender.PacketSender;
 import io.netty5.channel.Channel;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.logging.Level;
 
 @Getter
 public class NettyTransmitter extends PacketSender {
@@ -47,41 +50,55 @@ public class NettyTransmitter extends PacketSender {
     public <P extends PacketBase> void writePacket(P packet)
     {
         if (!(channel != null && channel.isOpen())) {
+            Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;
         }
         channel.write(packet);
+        Packery.debug(Level.INFO, this.getClass(), "writePacket: write: " + packet.getClass().getSimpleName());
     }
 
     @Override
     public void flush()
     {
         if (!(channel != null && channel.isOpen())) {
+            Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;
         }
         channel.flush();
+        Packery.debug(Level.INFO, this.getClass(), "flush");
     }
 
     @Override
     public <P extends PacketBase> void sendPacketAsync(P packet) {
         if (!(channel != null && channel.isOpen())) {
+            Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;
         }
-        ExecutionUtils.ASYNC_EXECUTOR.execute(() -> channel.writeAndFlush(packet));
+        ExecutionUtils.ASYNC_EXECUTOR.execute(() -> {
+            channel.writeAndFlush(packet);
+            Packery.debug(Level.INFO, this.getClass(), "sendPacketAsync: writeAndFlush: " + packet.getClass().getSimpleName());
+        });
     }
 
     @Override
     public <P extends PacketBase> void sendPacket(P packet) {
         if (!(channel != null && channel.isOpen())) {
+            Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;
         }
         channel.writeAndFlush(packet);
+        Packery.debug(Level.INFO, this.getClass(), "sendPacket: writeAndFlush: " + packet.getClass().getSimpleName());
     }
 
     @Override
     public <P extends PacketBase> void sendPacketSync(P packet) {
         if (!(channel != null && channel.isOpen())) {
+            Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;
         }
-        ExecutionUtils.DIRECT_EXECUTOR.execute(() -> channel.writeAndFlush(packet));
+        ExecutionUtils.DIRECT_EXECUTOR.execute(() -> {
+            channel.writeAndFlush(packet);
+            Packery.debug(Level.INFO, this.getClass(), "sendPacketSync: writeAndFlush: " + packet.getClass().getSimpleName());
+        });
     }
 }

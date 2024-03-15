@@ -60,6 +60,7 @@ public class PacketInDecoder extends ByteToMessageDecoder {
             var packetUUID = byteBuffer.readUUID();
             var seasonId = byteBuffer.readLong();
 
+            Packery.debug(Level.INFO, this.getClass(), "decode: readLong: packetId " + packetClass.getSimpleName());
             packetInstance.packetId(packetId);
 
             if (!this.packetManager.isPacketAllow(packetInstance)) {
@@ -67,8 +68,11 @@ public class PacketInDecoder extends ByteToMessageDecoder {
                 return;
             }
 
+            Packery.debug(Level.INFO, this.getClass(), "decode: readUUID: uniqueId " + packetClass.getSimpleName());
             packetInstance.uniqueId((packetUUID.equals(Packery.SYSTEM_UUID) ? null : packetUUID));
+            Packery.debug(Level.INFO, this.getClass(), "decode: readLong: seasonId " + packetClass.getSimpleName());
             packetInstance.seasonId(seasonId);
+            Packery.debug(Level.INFO, this.getClass(), "decode: read: byteBuffer " + packetClass.getSimpleName());
             packetInstance.read(byteBuffer);
             ctx.fireChannelRead(packetInstance);
         } catch (Exception exception) {

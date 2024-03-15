@@ -24,7 +24,6 @@ package de.pascxl.test.fun.test.respond;
  * SOFTWARE.
  */
 
-import de.golgolex.quala.Quala;
 import de.golgolex.quala.json.document.JsonDocument;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.packet.listener.PacketRespondListener;

@@ -25,6 +25,7 @@ package de.pascxl.test.fun;
  */
 
 import de.golgolex.quala.json.document.JsonDocument;
+import de.golgolex.quala.scheduler.Scheduler;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
@@ -69,17 +70,18 @@ public class Client {
 
         TestRequestPacket testRequestPacket = new TestRequestPacket("test");
 
-        var respondPacket = nettyClient.packetManager()
-                .packetRequester()
-                .queryUnsafe(testRequestPacket, nettyClient.nettyTransmitter());
+        Scheduler.runtimeScheduler().schedule(() -> {
+            var respondPacket = nettyClient.packetManager()
+                    .packetRequester()
+                    .queryUnsafe(testRequestPacket, nettyClient.nettyTransmitter());
 
-        if (respondPacket == null)
-        {
-            System.out.println("result is null");
-            return;
-        }
+            if (respondPacket == null) {
+                System.out.println("result is null");
+                return;
+            }
 
-        System.out.println(((TestPacket) respondPacket.packet()).jsonDocument().readString("test"));
+            System.out.println(((TestPacket) respondPacket.packet()).jsonDocument().readString("test"));
+        }, 25000);
 
 /*        nettyClient.packetManager()
                 .packetRequester()
