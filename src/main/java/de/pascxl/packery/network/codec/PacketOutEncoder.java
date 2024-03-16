@@ -55,7 +55,7 @@ public class PacketOutEncoder extends MessageToByteEncoder<PacketBase> {
         }
 
         byteBuffer.writeString(msg.getClass().getName());
-        Packery.debug(Level.INFO, this.getClass(), "encode: writeString: getClass().getName " + msg.getClass().getSimpleName());
+        Packery.debug(Level.INFO, this.getClass(), "encode: writeString: className " + msg.getClass().getSimpleName());
         byteBuffer.writeLong(msg.packetId());
         Packery.debug(Level.INFO, this.getClass(), "encode: writeLong: packetId " + msg.getClass().getSimpleName());
         byteBuffer.writeUUID(msg.uniqueId() == null ? Packery.SYSTEM_UUID : msg.uniqueId());

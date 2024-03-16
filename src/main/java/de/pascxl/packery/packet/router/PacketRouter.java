@@ -50,7 +50,7 @@ public class PacketRouter {
         var resultFuture = new CompletableFuture<RoutingResult>();
         var value = new Value<>(RoutingResult.FAILED_UNKNOWN);
         result.put(packetUniqueId, value);
-        transmitter.sendPacket(routingPacket);
+        executorService.schedule(() -> transmitter.sendPacket(routingPacket));
 
         executorService.schedule(() -> {
             RoutingResult finalResult = result.get(packetUniqueId).value();
@@ -66,7 +66,7 @@ public class PacketRouter {
 
         var value = new Value<>(RoutingResult.IDLE);
         result.put(packetUniqueId, value);
-        transmitter.sendPacket(routingPacket);
+        executorService.schedule(() -> transmitter.sendPacket(routingPacket));
 
         int i = 0;
 

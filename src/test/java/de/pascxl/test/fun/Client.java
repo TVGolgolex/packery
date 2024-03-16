@@ -70,7 +70,6 @@ public class Client {
 
         TestRequestPacket testRequestPacket = new TestRequestPacket("test");
 
-        Scheduler.runtimeScheduler().schedule(() -> {
             var respondPacket = nettyClient.packetManager()
                     .packetRequester()
                     .queryUnsafe(testRequestPacket, nettyClient.nettyTransmitter());
@@ -81,7 +80,6 @@ public class Client {
             }
 
             System.out.println(((TestPacket) respondPacket.packet()).jsonDocument().readString("test"));
-        }, 25000);
 
 /*        nettyClient.packetManager()
                 .packetRequester()

@@ -56,7 +56,7 @@ public class PacketRequester {
         var resultFuture = new CompletableFuture<RespondPacket>();
         Value<RequestResult<?>> value = new Value<>(null);
         waiting.put(packetUniqueId, value);
-        transmitter.sendPacket(packet);
+        executorService.schedule(() -> transmitter.sendPacket(packet));
 
         executorService.schedule(() -> {
             Value<RequestResult<?>> resultValue = waiting.get(packetUniqueId);
@@ -72,7 +72,7 @@ public class PacketRequester {
 
         Value<RequestResult<?>> value = new Value<>(null);
         waiting.put(packetUniqueId, value);
-        transmitter.sendPacket(packet);
+        executorService.schedule(() -> transmitter.sendPacket(packet));
 
         int i = 0;
 
