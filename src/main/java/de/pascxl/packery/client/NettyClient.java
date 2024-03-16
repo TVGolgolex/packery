@@ -38,6 +38,7 @@ import io.netty5.channel.EventLoopGroup;
 import io.netty5.channel.MultithreadEventLoopGroup;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,8 @@ public class NettyClient implements AutoCloseable {
     protected final ChannelIdentity channelIdentity;
     protected final InactiveAction inactiveAction;
     protected final PacketManager packetManager;
+    @Setter
+    protected String name;
     protected NettyTransmitter nettyTransmitter;
     protected Bootstrap bootstrap;
     protected boolean connected = false;
@@ -94,6 +97,11 @@ public class NettyClient implements AutoCloseable {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new NettyClientChannelInitializer(this));
 
+        if (name == null) {
+            name = StringUtils.generateRandomString(8);
+            Packery.log(Level.INFO, this.getClass(), "NettyClient (" + hostName + ":" + port + ") has no specific name. (Generated: " + this.name + ")");
+        }
+
         var initThread = new InitThread(this.bootstrap, hostName, port);
         var thread = new Thread(initThread);
         thread.start();
@@ -119,7 +127,7 @@ public class NettyClient implements AutoCloseable {
     }
 
     @Getter
-    public static class InitThread implements Runnable {
+    public class InitThread implements Runnable {
 
         private final Bootstrap bootstrap;
         private final String host;
@@ -139,9 +147,9 @@ public class NettyClient implements AutoCloseable {
                 this.channel = bootstrap.connect(host, port)
                         .addListener(future -> {
                             if (future.isSuccess()) {
-                                Packery.LOGGER.log(Level.INFO, Packery.BRANDING + " successfully connected @" + host + ":" + port);
+                                Packery.log(Level.INFO, "Successfully connecting to " + NettyClient.this.name + " @" + host + ":" + port);
                             } else {
-                                Packery.LOGGER.log(Level.INFO, Packery.BRANDING + " failed while connecting @" + host + ":" + port);
+                                Packery.log(Level.INFO, "Failed while connecting to " + NettyClient.this.name + " @" + host + ":" + port);
                             }
                         })
                         .asStage()

@@ -31,18 +31,37 @@ import java.util.logging.Logger;
 public class Packery {
 
     public static final UUID SYSTEM_UUID = UUID.fromString("0f0f0f0f-0f0f-0f0f-f0f0-0f0f0f0f0f0f");
-    public static String BRANDING = "Packery";
     public static boolean DEV_MODE = false;
-    public static Logger LOGGER = Logger.getLogger(BRANDING);
+    private static final Logger logger = Logger.getLogger("Packery");
+    public static org.slf4j.Logger slf4jLogger;
+
+    public static void log(Level level, String var, Object... objects) {
+        if (slf4jLogger != null) {
+            if (level.equals(Level.INFO)) {
+                slf4jLogger.info(buildMessage(var, objects));
+            }
+            if (level.equals(Level.FINEST)) {
+                slf4jLogger.debug(buildMessage(var, objects));
+            }
+            if (level.equals(Level.SEVERE)) {
+                slf4jLogger.error(buildMessage(var, objects));
+            }
+            if (level.equals(Level.WARNING)) {
+                slf4jLogger.warn(buildMessage(var, objects));
+            }
+            return;
+        }
+        logger.log(level, buildMessage(var, objects));
+    }
 
     public static void debug(Level level, Class<?> executedClass, String string, Object... var) {
         if (DEV_MODE) {
-            LOGGER.log(level, executedClass.getSimpleName() + ": " + buildMessage(string, var));
+            log(level, executedClass.getSimpleName() + ": " + string, var);
         }
     }
 
     public static void log(Level level, Class<?> executedClass, String string, Object... var) {
-        LOGGER.log(level, executedClass.getSimpleName() + ": " + buildMessage(string, var));
+        log(level, executedClass.getSimpleName() + ": " + string, var);
     }
 
     private static String buildMessage(String s, Object... objects) {

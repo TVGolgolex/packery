@@ -115,7 +115,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         if ((!ctx.channel().isActive() || !ctx.channel().isOpen() || !ctx.channel().isWritable())) {
-            Packery.LOGGER.log(Level.INFO, "Channel inactive: " + ctx.channel().remoteAddress());
+            Packery.log(Level.INFO, "Channel inactive: " + ctx.channel().remoteAddress());
             unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
             for (var transmitter : transmitters) {
                 if (!transmitter.channel().remoteAddress().equals(ctx.channel().remoteAddress())) {

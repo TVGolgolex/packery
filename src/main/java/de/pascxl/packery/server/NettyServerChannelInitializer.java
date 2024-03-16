@@ -46,10 +46,10 @@ public class NettyServerChannelInitializer extends ChannelInitializer<Channel> {
 
     @Override
     protected void initChannel(Channel ch) throws Exception {
-        Packery.LOGGER.log(Level.INFO, "Initialize Channel: " + ch.remoteAddress().toString());
+        Packery.log(Level.INFO, "Initialize Channel: " + ch.remoteAddress().toString());
         this.nettyServerHandler.unauthenticated().add(ch);
         Packery.debug(Level.INFO, this.getClass(), "Added channel (" + ch.remoteAddress().toString() + ") to unauthenticated");
-        ch.pipeline().addLast(new PacketInDecoder(this.server.packetManager()), new PacketOutEncoder(this.server.packetManager()), nettyServerHandler);
+        ch.pipeline().addLast(new PacketInDecoder(this.server.packetManager(), this.server.name()), new PacketOutEncoder(this.server.packetManager(), this.server.name()), nettyServerHandler);
         Packery.debug(Level.INFO, this.getClass(), "Added channel (" + ch.remoteAddress().toString() + ") pipelines");
         EventManager.call(new ChannelInitEvent(ch));
         Packery.debug(Level.INFO, this.getClass(), "EventCall ChannelInit: (" + ch.remoteAddress().toString() + ")");

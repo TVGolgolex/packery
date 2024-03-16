@@ -24,11 +24,11 @@ package de.pascxl.packery.server;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.packet.PacketManager;
 import de.pascxl.packery.utils.NettyUtils;
 import io.netty5.bootstrap.ServerBootstrap;
-import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelOption;
 import io.netty5.channel.EventLoopGroup;
 import io.netty5.channel.MultithreadEventLoopGroup;
@@ -36,8 +36,8 @@ import io.netty5.channel.epoll.Epoll;
 import io.netty5.handler.ssl.SslContext;
 import io.netty5.handler.ssl.SslContextBuilder;
 import io.netty5.handler.ssl.util.SelfSignedCertificate;
-import io.netty5.util.concurrent.Future;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
@@ -51,6 +51,8 @@ public class NettyServer implements AutoCloseable{
     protected final EventLoopGroup workerEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final PacketManager packetManager;
     protected final NettyServerHandler nettyServerHandler;
+    @Setter
+    protected String name;
     protected ServerBootstrap serverBootstrap;
     protected SslContext ssl;
     protected boolean connected = false;
@@ -89,7 +91,12 @@ public class NettyServer implements AutoCloseable{
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childHandler(new NettyServerChannelInitializer(this, nettyServerHandler));
 
-        Packery.debug(Level.INFO, this.getClass(), "Using " + (Epoll.isAvailable() ? "Epoll native transport" : "NIO transport"));
+        Packery.log(Level.INFO, this.getClass(), "Using " + (Epoll.isAvailable() ? "Epoll native transport" : "NIO transport"));
+
+        if (name == null) {
+            name = StringUtils.generateRandomString(8);
+            Packery.log(Level.INFO, this.getClass(), "NettyServer (" + hostName + ":" + port + ") has no specific name. (Generated: " + this.name + ")");
+        }
 
         var channelFuture = serverBootstrap
                 .bind(
@@ -97,9 +104,9 @@ public class NettyServer implements AutoCloseable{
                         port)
                 .addListener(future -> {
                     if (future.isSuccess()) {
-                        Packery.LOGGER.log(Level.INFO, Packery.BRANDING + " is listening @" + hostName + ":" + port);
+                        Packery.log(Level.INFO, "Opened network listener for " + name + " @" + hostName + ":" + port);
                     } else {
-                        Packery.LOGGER.log(Level.INFO, Packery.BRANDING + " failed while bind @" + hostName + ":" + port);
+                        Packery.log(Level.INFO, "Failed while opening network listener for " + name + " @" + hostName + ":" + port);
                     }
                 });
 

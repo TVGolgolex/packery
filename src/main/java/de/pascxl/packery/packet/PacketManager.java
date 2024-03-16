@@ -31,8 +31,8 @@ import de.pascxl.packery.events.PacketIdDisallowEvent;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
 import de.pascxl.packery.packet.listener.PacketReceiveListener;
-import de.pascxl.packery.packet.router.PacketRouter;
 import de.pascxl.packery.packet.request.PacketRequester;
+import de.pascxl.packery.packet.router.PacketRouter;
 import de.pascxl.packery.packet.sender.PacketSender;
 import io.netty5.channel.ChannelHandlerContext;
 import lombok.Getter;
@@ -108,8 +108,7 @@ public class PacketManager {
     public boolean isPacketAllow(PacketBase packetBase) {
         var packetId = packetBase.packetId();
 
-        Packery.log(Level.INFO, this.getClass(), "Checking PacketId: {0}", packetId);
-
+        Packery.debug(Level.INFO, this.getClass(), "Checking PacketId: {0}", packetId);
         if (this.allowedPacketIds.contains(774090777346262697L)) {
             Packery.debug(Level.SEVERE, this.getClass(), "Allowed all: bypass: {0}", packetId);
             return true;
@@ -127,10 +126,16 @@ public class PacketManager {
             return true;
         }
 
-        return packetId == -400
+        var result = packetId == -400
                 || packetId == -410
                 || packetId == -411
                 || this.allowedPacketIds.contains(packetId);
+
+        if (!result) {
+            Packery.log(Level.SEVERE, this.getClass(), "Packet check for: {0} is marked as not allowed!", packetId);
+        }
+
+        return result;
     }
 
     public void allowPacket(long id) {

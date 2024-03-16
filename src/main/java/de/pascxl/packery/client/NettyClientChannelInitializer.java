@@ -46,6 +46,9 @@ public class NettyClientChannelInitializer extends ChannelInitializer<Channel> {
             Packery.log(Level.SEVERE, this.getClass(), "Channel is null");
             return;
         }
-        ch.pipeline().addLast(new PacketInDecoder(this.client.packetManager()), new PacketOutEncoder(this.client.packetManager()), new NettyClientHandler(client));
+        ch.pipeline().addLast(new PacketInDecoder(this.client.packetManager(), this.client.name()),
+                new PacketOutEncoder(this.client.packetManager(), this.client.name()),
+                new NettyClientHandler(client));
     }
+
 }
