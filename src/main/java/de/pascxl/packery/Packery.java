@@ -24,6 +24,8 @@ package de.pascxl.packery;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.ConsoleColor;
+
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,24 +36,45 @@ public class Packery {
     public static boolean DEV_MODE = false;
     private static final Logger logger = Logger.getLogger("Packery");
     public static org.slf4j.Logger slf4jLogger;
+    public static ConsoleColor errorConsoleColor = ConsoleColor.RED;
+    public static ConsoleColor warnConsoleColor = ConsoleColor.RED;
+    public static ConsoleColor debugConsoleColor = ConsoleColor.YELLOW;
+    public static ConsoleColor normalConsoleColor = ConsoleColor.AQUA;
 
     public static void log(Level level, String var, Object... objects) {
         if (slf4jLogger != null) {
             if (level.equals(Level.INFO)) {
-                slf4jLogger.info(buildMessage(var, objects));
+                slf4jLogger.info(logCode(level).ansiCode() + buildMessage(var, objects) + ConsoleColor.DEFAULT.ansiCode());
             }
             if (level.equals(Level.FINEST)) {
-                slf4jLogger.debug(buildMessage(var, objects));
+                slf4jLogger.debug(logCode(level).ansiCode() + buildMessage(var, objects) + ConsoleColor.DEFAULT.ansiCode());
             }
             if (level.equals(Level.SEVERE)) {
-                slf4jLogger.error(buildMessage(var, objects));
+                slf4jLogger.error(logCode(level).ansiCode() + buildMessage(var, objects) + ConsoleColor.DEFAULT.ansiCode());
             }
             if (level.equals(Level.WARNING)) {
-                slf4jLogger.warn(buildMessage(var, objects));
+                slf4jLogger.warn(logCode(level).ansiCode() + buildMessage(var, objects) + ConsoleColor.DEFAULT.ansiCode());
             }
             return;
         }
-        logger.log(level, buildMessage(var, objects));
+        logger.log(level, logCode(level).ansiCode() + buildMessage(var, objects) + ConsoleColor.DEFAULT.ansiCode());
+    }
+
+    private static ConsoleColor logCode(Level level) {
+        switch (level.getName()) {
+            case "FINEST" -> {
+                return debugConsoleColor;
+            }
+            case "SEVERE" -> {
+                return errorConsoleColor;
+            }
+            case "WARNING" -> {
+                return warnConsoleColor;
+            }
+            default -> {
+                return normalConsoleColor;
+            }
+        }
     }
 
     public static void debug(Level level, Class<?> executedClass, String string, Object... var) {

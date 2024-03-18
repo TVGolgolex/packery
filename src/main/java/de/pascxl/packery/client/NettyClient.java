@@ -24,6 +24,7 @@ package de.pascxl.packery.client;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.ConsoleColor;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.network.InactiveAction;
@@ -99,7 +100,7 @@ public class NettyClient implements AutoCloseable {
 
         if (name == null) {
             name = StringUtils.generateRandomString(8);
-            Packery.log(Level.INFO, this.getClass(), "NettyClient (" + hostName + ":" + port + ") has no specific name. (Generated: " + this.name + ")");
+            Packery.log(Level.INFO, this.getClass(), ConsoleColor.YELLOW.ansiCode() + "NettyClient (" + hostName + ":" + port + ") has no specific name. (Generated: " + this.name + ")");
         }
 
         var initThread = new InitThread(this.bootstrap, hostName, port);
@@ -113,7 +114,7 @@ public class NettyClient implements AutoCloseable {
         }
 
         if (initThread.channel() == null) {
-            Packery.debug(Level.SEVERE, this.getClass(), "Channel is null");
+            Packery.debug(Level.SEVERE, this.getClass(), ConsoleColor.RED.ansiCode() + "Channel is null");
             return false;
         }
 
@@ -147,9 +148,9 @@ public class NettyClient implements AutoCloseable {
                 this.channel = bootstrap.connect(host, port)
                         .addListener(future -> {
                             if (future.isSuccess()) {
-                                Packery.log(Level.INFO, "Successfully connecting to " + NettyClient.this.name + " @" + host + ":" + port);
+                                Packery.log(Level.INFO, ConsoleColor.GREEN.ansiCode() + "Successfully connecting to " + NettyClient.this.name + " @" + host + ":" + port);
                             } else {
-                                Packery.log(Level.INFO, "Failed while connecting to " + NettyClient.this.name + " @" + host + ":" + port);
+                                Packery.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Failed while connecting to " + NettyClient.this.name + " @" + host + ":" + port);
                             }
                         })
                         .asStage()

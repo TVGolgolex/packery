@@ -24,6 +24,7 @@ package de.pascxl.packery.server;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.ConsoleColor;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.packet.PacketManager;
@@ -45,7 +46,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 @Getter
-public class NettyServer implements AutoCloseable{
+public class NettyServer implements AutoCloseable {
 
     protected final EventLoopGroup bossEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final EventLoopGroup workerEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
@@ -91,11 +92,11 @@ public class NettyServer implements AutoCloseable{
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childHandler(new NettyServerChannelInitializer(this, nettyServerHandler));
 
-        Packery.log(Level.INFO, this.getClass(), "Using " + (Epoll.isAvailable() ? "Epoll native transport" : "NIO transport"));
+        Packery.debug(Level.INFO, this.getClass(), Packery.debugConsoleColor.ansiCode() + "Using " + (Epoll.isAvailable() ? "Epoll native transport" : "NIO transport"));
 
         if (name == null) {
             name = StringUtils.generateRandomString(8);
-            Packery.log(Level.INFO, this.getClass(), "NettyServer (" + hostName + ":" + port + ") has no specific name. (Generated: " + this.name + ")");
+            Packery.log(Level.INFO, this.getClass(), ConsoleColor.YELLOW.ansiCode() + "NettyServer (" + hostName + ":" + port + ") has no specific name. (Generated: " + this.name + ")");
         }
 
         var channelFuture = serverBootstrap
@@ -104,9 +105,9 @@ public class NettyServer implements AutoCloseable{
                         port)
                 .addListener(future -> {
                     if (future.isSuccess()) {
-                        Packery.log(Level.INFO, "Opened network listener for " + name + " @" + hostName + ":" + port);
+                        Packery.log(Level.INFO, ConsoleColor.GREEN.ansiCode() + "Opened network listener for " + name + " @" + hostName + ":" + port);
                     } else {
-                        Packery.log(Level.INFO, "Failed while opening network listener for " + name + " @" + hostName + ":" + port);
+                        Packery.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Failed while opening network listener for " + name + " @" + hostName + ":" + port);
                     }
                 });
 

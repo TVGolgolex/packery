@@ -138,7 +138,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
     @Override
     public void channelExceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if (!(cause instanceof IOException)) {
-            Packery.debug(Level.SEVERE, this.getClass(), "channelExceptionCaught: " + cause.getMessage());
+            Packery.debug(Level.SEVERE, this.getClass(), "Channel: " + ctx.channel().remoteAddress() + " exception caught: " + cause.fillInStackTrace().getMessage());
         }
     }
 
