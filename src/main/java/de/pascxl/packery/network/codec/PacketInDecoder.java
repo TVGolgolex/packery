@@ -25,6 +25,7 @@ package de.pascxl.packery.network.codec;
  */
 
 import de.golgolex.quala.reflections.Allocator;
+import de.golgolex.quala.utils.executors.ExecutionUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.packet.PacketBase;
@@ -44,42 +45,45 @@ public class PacketInDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, Buffer in) throws Exception {
-        var byteBuffer = new ByteBuffer(in);
-        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "Before read, length: {0}", in.readableBytes());
+        ExecutionUtils.ASYNC_EXECUTOR.execute(() -> {
+            var byteBuffer = new ByteBuffer(in);
+            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "Before read, length: {0}", in.readableBytes());
 
-        try {
-            var packetClassName = byteBuffer.readString();
-            var packetClass = Class.forName(packetClassName);
-            var packetInstance = (PacketBase) Allocator.unsafeAllocation(packetClass);
+            try {
+                var packetClassName = byteBuffer.readString();
+                var packetClass = Class.forName(packetClassName);
+                var packetInstance = (PacketBase) Allocator.unsafeAllocation(packetClass);
 
-            if (packetInstance == null) {
-                Packery.log(Level.SEVERE, this.getClass(), providerName + ":" + "PacketInstance is null");
-                return;
+                if (packetInstance == null) {
+                    Packery.log(Level.SEVERE, this.getClass(), providerName + ":" + "PacketInstance is null");
+                    return;
+                }
+
+                var packetId = byteBuffer.readLong();
+                var packetUUID = byteBuffer.readUUID();
+                var seasonId = byteBuffer.readLong();
+
+                Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readLong: packetId " + packetClass.getSimpleName());
+                packetInstance.packetId(packetId);
+
+                if (!this.packetManager.isPacketAllow(packetInstance)) {
+                    Packery.log(Level.SEVERE, this.getClass(), providerName + ":" + "The channel {0} tries to send a packet which is not allowed: PacketId: {1}", ctx.channel().remoteAddress(), packetId);
+                    return;
+                }
+
+                Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readUUID: uniqueId " + packetClass.getSimpleName());
+                packetInstance.uniqueId((packetUUID.equals(Packery.SYSTEM_UUID) ? null : packetUUID));
+                Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readLong: seasonId " + packetClass.getSimpleName());
+                packetInstance.seasonId(seasonId);
+                Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: read: byteBuffer " + packetClass.getSimpleName());
+                packetInstance.read(byteBuffer);
+                ctx.fireChannelRead(packetInstance);
+            } catch (Exception exception) {
+                Packery.log(Level.SEVERE, this.getClass(), exception.getMessage());
             }
 
-            var packetId = byteBuffer.readLong();
-            var packetUUID = byteBuffer.readUUID();
-            var seasonId = byteBuffer.readLong();
-
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readLong: packetId " + packetClass.getSimpleName());
-            packetInstance.packetId(packetId);
-
-            if (!this.packetManager.isPacketAllow(packetInstance)) {
-                Packery.log(Level.SEVERE, this.getClass(), providerName + ":" + "The channel {0} tries to send a packet which is not allowed: PacketId: {1}", ctx.channel().remoteAddress(), packetId);
-                return;
-            }
-
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readUUID: uniqueId " + packetClass.getSimpleName());
-            packetInstance.uniqueId((packetUUID.equals(Packery.SYSTEM_UUID) ? null : packetUUID));
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readLong: seasonId " + packetClass.getSimpleName());
-            packetInstance.seasonId(seasonId);
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: read: byteBuffer " + packetClass.getSimpleName());
-            packetInstance.read(byteBuffer);
-            ctx.fireChannelRead(packetInstance);
-        } catch (Exception exception) {
-            Packery.log(Level.SEVERE, this.getClass(), exception.getMessage());
-        }
-
-        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "After read, length: {0}", in.readableBytes());
+            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "After read, length: {0}", in.readableBytes());
+            in.resetOffsets();
+        });
     }
 }

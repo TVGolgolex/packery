@@ -24,6 +24,7 @@ package de.pascxl.packery.network.codec;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.utils.executors.ExecutionUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.packet.PacketBase;
@@ -65,5 +66,6 @@ public class PacketOutEncoder extends MessageToByteEncoder<PacketBase> {
         Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "encode: writeLong: seasonId " + msg.getClass().getSimpleName());
         msg.write(byteBuffer);
         Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "encode: write " + msg.getClass().getSimpleName());
+        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "After write, length: {0}", out.readableBytes());
     }
 }

@@ -25,8 +25,10 @@ package de.pascxl.packery.client;
  */
 
 import de.golgolex.quala.ConsoleColor;
+import de.golgolex.quala.scheduler.Scheduler;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
+import de.pascxl.packery.internal.PacketOutChannelStayActive;
 import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.NettyTransmitter;
@@ -60,6 +62,7 @@ public class NettyClient implements AutoCloseable {
     protected NettyTransmitter nettyTransmitter;
     protected Bootstrap bootstrap;
     protected boolean connected = false;
+    protected boolean stayActive = false;
 
     public NettyClient(@NonNull ChannelIdentity channelIdentity, @NonNull InactiveAction inactiveAction, @NonNull PacketManager packetManager) {
         this.inactiveAction = inactiveAction;
@@ -120,6 +123,14 @@ public class NettyClient implements AutoCloseable {
 
         connected = true;
         return true;
+    }
+
+    public void stayActive() {
+        if (stayActive) {
+            Packery.log(Level.WARNING, "StayActive is already enabled");
+            return;
+        }
+        Scheduler.runtimeScheduler().schedule(() -> nettyTransmitter.sendPacket(new PacketOutChannelStayActive()), 60000, 60000);
     }
 
     @Override

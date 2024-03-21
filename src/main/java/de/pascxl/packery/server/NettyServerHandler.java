@@ -24,6 +24,7 @@ package de.pascxl.packery.server;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.scheduler.Scheduler;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.internal.PacketOutAuthentication;
 import de.pascxl.packery.internal.PacketOutIdentityActive;
@@ -81,19 +82,22 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
         if (msg instanceof RoutingPacket routingPacket) {
             Packery.debug(Level.INFO, this.getClass(), "Received RelayPacket: " + routingPacket.getClass().getSimpleName() + " to: " + routingPacket.to() + " Transmitters: " + this.transmitters.size());
 
-            transmitters.stream()
-                    .filter(transmitter -> transmitter.channelIdentity().equals(routingPacket.to()))
-                    .findFirst()
-                    .ifPresentOrElse(transmitter -> {
-                        Packery.debug(Level.INFO, this.getClass(), "Send Packet RelayPacket: " + routingPacket.getClass().getSimpleName());
-                        transmitter.sendPacketSync(routingPacket.packet());
-                        ctx.channel().writeAndFlush(
-                                new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.SUCCESS));
-                    }, () -> {
-                        Packery.debug(Level.INFO, this.getClass(), "No Channel with Id: " + routingPacket.to() + " found.");
-                        ctx.channel().writeAndFlush(
-                                new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.FAILED_NO_CLIENT));
-                    });
+            Scheduler.runtimeScheduler().schedule(() -> {
+                transmitters.stream()
+                        .filter(transmitter -> transmitter.channelIdentity().equals(routingPacket.to()))
+                        .findFirst()
+                        .ifPresentOrElse(transmitter -> {
+                            Packery.debug(Level.INFO, this.getClass(), "Send Packet RelayPacket: " + routingPacket.getClass().getSimpleName());
+                            transmitter.sendPacketSync(routingPacket.packet());
+                            ctx.channel().writeAndFlush(
+                                    new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.SUCCESS));
+                        }, () -> {
+                            Packery.debug(Level.INFO, this.getClass(), "No Channel with Id: " + routingPacket.to() + " found.");
+                            ctx.channel().writeAndFlush(
+                                    new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.FAILED_NO_CLIENT));
+                        });
+            }, 100);
+
             return;
         }
 

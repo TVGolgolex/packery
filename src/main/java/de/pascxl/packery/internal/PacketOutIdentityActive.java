@@ -51,7 +51,7 @@ public class PacketOutIdentityActive extends AbstractIdentityPacket {
 
     @Override
     public void writeCustom(ByteBuffer byteBuffer) {
-        Packery.debug(Level.INFO, this.getClass(), "Other is empty: " + (other != null));
+        Packery.debug(Level.INFO, this.getClass(), "Other is empty: " + (other == null));
         byteBuffer.writeBoolean(other != null);
         if (other != null) {
             byteBuffer.writeCollectionString(other

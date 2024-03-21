@@ -110,14 +110,15 @@ public class PacketManager {
 
         Packery.debug(Level.INFO, this.getClass(), "Checking PacketId: {0}", packetId);
         if (this.allowedPacketIds.contains(774090777346262697L)) {
-            Packery.debug(Level.SEVERE, this.getClass(), "Allowed all: bypass: {0}", packetId);
+            Packery.debug(Level.WARNING, this.getClass(), "Allowed all: bypass: {0}", packetId);
             return true;
         }
 
         if (packetId < 1
                 && packetId != -400
                 && packetId != -410
-                && packetId != -411) {
+                && packetId != -411
+                && packetId != -412) {
             Packery.log(Level.SEVERE, this.getClass(), "No packet IDs less than 1 are permitted: Requested: {0}", packetId);
             return false;
         }
@@ -126,9 +127,11 @@ public class PacketManager {
             return true;
         }
 
-        var result = packetId == -400
+        var result =
+                packetId == -400
                 || packetId == -410
                 || packetId == -411
+                || packetId == -412
                 || this.allowedPacketIds.contains(packetId);
 
         if (!result) {

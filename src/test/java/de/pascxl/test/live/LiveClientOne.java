@@ -50,7 +50,7 @@ public class LiveClientOne {
                 testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
             }
 
-            /*var result = nettyClient
+            var result = nettyClient
                     .packetManager()
                     .packetRouter()
                     .routeUnsafe(new RoutingPacket(2, testPacket, nettyClient
@@ -62,9 +62,9 @@ public class LiveClientOne {
                             nettyClient.nettyTransmitter()
                     );
 
-            System.out.println(result.name());*/
+            System.out.println(result.name());
 
-/*            var relayResult = nettyClient
+            var relayResult = nettyClient
                     .packetManager()
                     .packetRouter()
                     .routeFuture(new RoutingPacket(2, testPacket,
@@ -78,9 +78,11 @@ public class LiveClientOne {
                             nettyClient.nettyTransmitter()
                     );
 
+//            System.out.println(((Rout)));
+
             System.out.println(relayResult.whenComplete((routingResult1, throwable) -> {
                 System.out.println(routingResult1.name());
-            }));*/
+            }));
         }, 5000);
 
 

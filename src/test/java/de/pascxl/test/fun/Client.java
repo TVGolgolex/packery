@@ -49,6 +49,7 @@ public class Client {
 
         nettyClient.packetManager().allowPacket(4);
         nettyClient.packetManager().allowPacket(3);
+        nettyClient.stayActive();
 
         PacketQueue packetQueue = new PacketQueue(nettyClient.nettyTransmitter());
 
