@@ -1,10 +1,17 @@
 package de.pascxl.packery.buffer;
 
 import io.netty5.buffer.Buffer;
+import io.netty5.buffer.BufferAccessor;
+import io.netty5.buffer.BufferRef;
 
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.io.BufferedWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /*
@@ -122,6 +129,32 @@ public record ByteBuffer(Buffer buffer) {
             collection.add(this.readInt());
         }
         return collection;
+    }
+
+    public ByteBuffer writeCollectionByteBuffer(Collection<ByteBuffer> collection) {
+        buffer.writeInt(collection.size());
+        for (ByteBuffer item : collection) {
+            Buffer itemBuffer = item.buffer();
+            int length = itemBuffer.readableBytes();
+            buffer.writeInt(length);
+            buffer.writeBytes(itemBuffer);
+        }
+        return this;
+    }
+
+    public Collection<ByteBuffer> readCollectionByteBuffer() {
+        int size = buffer.readInt();
+        List<ByteBuffer> result = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            int length = buffer.readInt();
+            byte[] data = new byte[length];
+            buffer.readBytes(java.nio.ByteBuffer.wrap(data));
+            Buffer itemBuffer = buffer.implicitCapacityLimit(data.length).copy();
+            itemBuffer.writeBytes(data);
+            ByteBuffer item = new ByteBuffer(itemBuffer);
+            result.add(item);
+        }
+        return result;
     }
 
     public ByteBuffer writeCollectionString(Collection<String> collection) {
