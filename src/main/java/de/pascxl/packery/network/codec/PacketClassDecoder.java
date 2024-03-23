@@ -50,9 +50,9 @@ public class PacketClassDecoder extends ByteToMessageDecoder {
             return;
         }
 
+        var byteBuffer = new ByteBuffer(buffer);
+        var packetClassName = byteBuffer.readString();
         try {
-            var byteBuffer = new ByteBuffer(buffer);
-            var packetClassName = byteBuffer.readString();
             Packery.debug(Level.INFO, this.getClass(), "Decode: " + packetClassName);
             var packetClass = Class.forName(packetClassName);
             var packet = (NettyPacket) Allocator.unsafeAllocation(packetClass);
@@ -73,10 +73,10 @@ public class PacketClassDecoder extends ByteToMessageDecoder {
             packet.read(byteBuffer);
             Packery.debug(Level.INFO, this.getClass(), "Read Packet: " + packet.getClass().getName());
             channelHandlerContext.fireChannelRead(packet);
-            buffer.resetOffsets();
         } catch (Exception exception) {
             Packery.log(Level.SEVERE, this.getClass(), exception.getMessage());
         }
+        buffer.resetOffsets();
 
     }
 }
