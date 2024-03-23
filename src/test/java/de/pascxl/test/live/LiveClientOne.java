@@ -20,9 +20,11 @@ import de.golgolex.quala.json.document.JsonDocument;
 import de.golgolex.quala.scheduler.Scheduler;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
+import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.InactiveAction;
+import de.pascxl.packery.packet.NettyPacket;
 import de.pascxl.packery.packet.defaults.relay.RoutingNettyPacket;
 import de.pascxl.packery.utils.BypassCheck;
 import de.pascxl.test.fun.test.TestNettyPacket;
@@ -44,7 +46,19 @@ public class LiveClientOne {
 
         nettyClient.packetManager().allowPacket(BypassCheck.class);
 
-        Scheduler.runtimeScheduler().schedule(() -> {
+        nettyClient.nettyTransmitter().sendPacket(new NettyPacket() {
+            @Override
+            public void write(ByteBuffer out) {
+
+            }
+
+            @Override
+            public void read(ByteBuffer in) {
+
+            }
+        });
+
+        /*Scheduler.runtimeScheduler().schedule(() -> {
             TestNettyPacket testPacket = new TestNettyPacket(new JsonDocument());
             for (int i = 0; i < 30; i++) {
                 testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
@@ -83,7 +97,7 @@ public class LiveClientOne {
             System.out.println(relayResult.whenComplete((routingResult1, throwable) -> {
                 System.out.println(routingResult1.name());
             }));
-        }, 5000);
+        }, 5000);*/
 
 
     }
