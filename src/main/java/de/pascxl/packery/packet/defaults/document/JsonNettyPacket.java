@@ -53,11 +53,11 @@ public class JsonNettyPacket extends NettyPacket {
 
     @Override
     public void write(ByteBuffer out) {
-        out.writeString(this.jsonDocument.jsonObjectToString());
+        out.writeString(JsonUtils.toJson(this.jsonDocument));
     }
 
     @Override
     public void read(ByteBuffer in) {
-        this.jsonDocument = new JsonDocument(JsonUtils.JSON.fromJson(in.readString(), JsonObject.class));
+        this.jsonDocument = new JsonDocument(JsonUtils.JSON.fromJson(in.readString(), JsonDocument.class));
     }
 }
