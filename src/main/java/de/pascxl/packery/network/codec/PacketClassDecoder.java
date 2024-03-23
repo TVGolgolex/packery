@@ -45,6 +45,11 @@ public class PacketClassDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, Buffer buffer) throws Exception {
 
+        if (buffer.readableBytes() < 55) {
+            Packery.debug(Level.SEVERE, this.getClass(), "Packet has not enough readable bytes (" + buffer.readableBytes() + ")");
+            return;
+        }
+
         try {
             var byteBuffer = new ByteBuffer(buffer);
             var packetClassName = byteBuffer.readString();
