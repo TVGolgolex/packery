@@ -54,6 +54,11 @@ public class NettyTransmitter extends PacketSender {
             return;
         }
         channel.write(packet);
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
+        }
         Packery.debug(Level.INFO, this.getClass(), "writePacket: write: " + packet.getClass().getSimpleName());
     }
 
@@ -65,6 +70,11 @@ public class NettyTransmitter extends PacketSender {
             return;
         }
         channel.flush();
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
+        }
         Packery.debug(Level.INFO, this.getClass(), "flush");
     }
 
@@ -76,6 +86,11 @@ public class NettyTransmitter extends PacketSender {
         }
         ExecutionUtils.ASYNC_EXECUTOR.execute(() -> {
             channel.writeAndFlush(packet);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
+            }
             Packery.debug(Level.INFO, this.getClass(), "sendPacketAsync: writeAndFlush: " + packet.getClass().getSimpleName());
         });
     }
@@ -87,6 +102,11 @@ public class NettyTransmitter extends PacketSender {
             return;
         }
         channel.writeAndFlush(packet);
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
+        }
         Packery.debug(Level.INFO, this.getClass(), "sendPacket: writeAndFlush: " + packet.getClass().getSimpleName());
     }
 
@@ -98,6 +118,11 @@ public class NettyTransmitter extends PacketSender {
         }
         ExecutionUtils.DIRECT_EXECUTOR.execute(() -> {
             channel.writeAndFlush(packet);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Packery.log(Level.SEVERE, this.getClass(), e.getMessage());
+            }
             Packery.debug(Level.INFO, this.getClass(), "sendPacketSync: writeAndFlush: " + packet.getClass().getSimpleName());
         });
     }
