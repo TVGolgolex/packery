@@ -64,8 +64,7 @@ public class RoutingNettyPacket extends NettyPacket {
             return;
         }
 
-        out.writeString(to.namespace())
-                .writeUUID(to.uniqueId());
+        out.writeString(to.namespace()).writeUUID(to.uniqueId());
         out.writeString(packet.getClass().getName());
         packet.write(out);
     }
