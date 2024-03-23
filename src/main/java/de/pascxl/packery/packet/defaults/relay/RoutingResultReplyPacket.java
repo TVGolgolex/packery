@@ -29,6 +29,7 @@ public class RoutingResultReplyPacket extends NettyPacket {
     private RoutingResult routingResult;
 
     public RoutingResultReplyPacket(UUID uniqueId, RoutingResult routingResult) {
+        super(uniqueId);
         this.routingResult = routingResult;
     }
 
