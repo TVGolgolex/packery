@@ -145,6 +145,7 @@ public class PacketManager {
         var packetId = packetBase.getClass().getName();
         Packery.debug(Level.INFO, this.getClass(), "Checking PacketId: {0}", packetId);
         if (packetBase.uniqueId() != null && this.packetQuery.waiting().containsKey(packetBase.uniqueId())) {
+            Packery.debug(Level.WARNING, this.getClass(), "Accepted {0} because Packet is in Query", packetId);
             return true;
         }
 
@@ -154,7 +155,9 @@ public class PacketManager {
             result = true;
         }
         if (!result) {
-            Packery.log(Level.SEVERE, this.getClass(), "Packet check for: {0} is marked as not allowed!", packetId);
+            Packery.debug(Level.SEVERE, this.getClass(), "Packet check for: {0} is marked as not allowed!", packetId);
+        } else {
+            Packery.debug(Level.WARNING, this.getClass(), "Accepted {0}", packetId);
         }
         return result;
     }
