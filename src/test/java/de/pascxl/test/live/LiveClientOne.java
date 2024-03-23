@@ -46,7 +46,7 @@ public class LiveClientOne {
 
         nettyClient.packetManager().allowPacket(BypassCheck.class);
 
-        nettyClient.nettyTransmitter().sendPacket(new NettyPacket() {
+/*        nettyClient.nettyTransmitter().sendPacket(new NettyPacket() {
             @Override
             public void write(ByteBuffer out) {
 
@@ -56,9 +56,9 @@ public class LiveClientOne {
             public void read(ByteBuffer in) {
 
             }
-        });
+        });*/
 
-        /*Scheduler.runtimeScheduler().schedule(() -> {
+        Scheduler.runtimeScheduler().schedule(() -> {
             TestNettyPacket testPacket = new TestNettyPacket(new JsonDocument());
             for (int i = 0; i < 30; i++) {
                 testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
@@ -97,7 +97,7 @@ public class LiveClientOne {
             System.out.println(relayResult.whenComplete((routingResult1, throwable) -> {
                 System.out.println(routingResult1.name());
             }));
-        }, 5000);*/
+        }, 5000);
 
 
     }
