@@ -58,7 +58,7 @@ public class PacketClassEncoder extends MessageToByteEncoder<NettyPacket> {
         byteBuffer.writeString(nettyPacket.getClass().getName());
         byteBuffer.writeUUID(nettyPacket.uniqueId() == null ? Packery.SYSTEM_UUID : nettyPacket.uniqueId());
         nettyPacket.write(byteBuffer);
-        Packery.debug(Level.INFO, this.getClass(), "Write Packet: " + nettyPacket.getClass().getName());
+        Packery.debug(Level.INFO, this.getClass(), "Write Packet: " + nettyPacket.getClass().getName() + ": bytes: " + buffer.readableBytes());
 
     }
 }
