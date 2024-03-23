@@ -30,23 +30,22 @@ import de.pascxl.packery.network.ChannelIdentity;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.logging.Level;
 
 @Getter
-public class PacketOutIdentityActive extends AbstractIdentityPacket {
+public class NettyPacketOutIdentityActive extends AbstractIdentityNettyPacket {
 
     private Collection<ChannelIdentity> other;
 
-    public PacketOutIdentityActive(@NonNull ChannelIdentity channelIdentity, @NonNull Collection<ChannelIdentity> other) {
-        super(-410, channelIdentity);
+    public NettyPacketOutIdentityActive(@NonNull ChannelIdentity channelIdentity, @NonNull Collection<ChannelIdentity> other) {
+        super(channelIdentity);
         this.other = other;
     }
 
-    public PacketOutIdentityActive(@NonNull ChannelIdentity channelIdentity) {
-        super(-410, channelIdentity);
+    public NettyPacketOutIdentityActive(@NonNull ChannelIdentity channelIdentity) {
+        super(channelIdentity);
     }
 
     @Override

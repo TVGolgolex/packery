@@ -28,14 +28,14 @@ import de.golgolex.quala.json.document.JsonDocument;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.packet.listener.PacketRespondListener;
 import de.pascxl.packery.packet.sender.PacketSender;
-import de.pascxl.test.fun.test.TestPacket;
+import de.pascxl.test.fun.test.TestNettyPacket;
 import io.netty5.channel.ChannelHandlerContext;
 
-public class TestRequestPacketListener extends PacketRespondListener<TestRequestPacket> {
+public class TestRequestPacketListener extends PacketRespondListener<TestQueryNettyPacket> {
     @Override
-    public void call(TestRequestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext)
+    public void call(TestQueryNettyPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext)
     {
-        TestPacket testPacket = new TestPacket(packetId, new JsonDocument());
+        TestNettyPacket testPacket = new TestNettyPacket(new JsonDocument());
 
         testPacket.jsonDocument().write("test", packet.message() + StringUtils.generateRandomString(98));
 

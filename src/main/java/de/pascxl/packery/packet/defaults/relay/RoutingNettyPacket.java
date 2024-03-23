@@ -28,20 +28,19 @@ import de.golgolex.quala.reflections.Allocator;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
 import de.pascxl.packery.network.ChannelIdentity;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.logging.Level;
 
 @Getter
-public class RoutingPacket extends PacketBase {
+public class RoutingNettyPacket extends NettyPacket {
 
-    private PacketBase packet;
+    private NettyPacket packet;
     private ChannelIdentity to;
 
-    public RoutingPacket(long packetId, @NonNull PacketBase packet, @NonNull ChannelIdentity to) {
-        super(packetId);
+    public RoutingNettyPacket(@NonNull NettyPacket packet, @NonNull ChannelIdentity to) {
         this.packet = packet;
         this.to = to;
     }
@@ -76,7 +75,7 @@ public class RoutingPacket extends PacketBase {
         this.to = new ChannelIdentity(in.readString(), in.readUUID());
         try {
             var packetClass = Class.forName(in.readString());
-            this.packet = (PacketBase) Allocator.unsafeAllocation(packetClass);
+            this.packet = (NettyPacket) Allocator.unsafeAllocation(packetClass);
 
             if (packet == null) {
                 Packery.log(Level.SEVERE, this.getClass(), "Packet cannot be allocated");

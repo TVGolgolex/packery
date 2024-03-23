@@ -24,7 +24,7 @@ package de.pascxl.packery.packet.listener;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import de.pascxl.packery.packet.sender.PacketSender;
 import io.netty5.channel.ChannelHandlerContext;
 import lombok.Setter;
@@ -32,11 +32,11 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Setter
-public abstract class PacketReceiveListener<T extends PacketBase> {
+public abstract class PacketReceiveListener<T extends NettyPacket> {
 
-    protected long packetId;
+//    protected long packetId;
+    protected String packetId;
     protected UUID uniqueId;
-    protected long seasonId;
 
     public abstract void call(T packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext);
 

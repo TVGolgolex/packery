@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet;
+package de.pascxl.packery.internal;
 
 /*
  * MIT License
@@ -25,30 +25,23 @@ package de.pascxl.packery.packet;
  */
 
 import de.pascxl.packery.buffer.ByteBuffer;
+import de.pascxl.packery.network.ChannelIdentity;
 import lombok.Getter;
-import lombok.Setter;
 
-import java.util.UUID;
-
-@Setter
 @Getter
-public abstract class PacketBase {
+public class NettyPacketOutAuthentication extends AbstractIdentityNettyPacket {
 
-    private long packetId;
-    private UUID uniqueId;
-    private long seasonId = System.currentTimeMillis();
-
-    public PacketBase(long packetId) {
-        this.packetId = packetId;
+    public NettyPacketOutAuthentication(ChannelIdentity channelIdentity) {
+        super(channelIdentity);
     }
 
-    public PacketBase(long packetId, UUID uniqueId) {
-        this.packetId = packetId;
-        this.uniqueId = uniqueId;
+    @Override
+    public void writeCustom(ByteBuffer byteBuffer) {
+        byteBuffer.writeBoolean(true);
     }
 
-    public abstract void write(ByteBuffer out);
-
-    public abstract void read(ByteBuffer in);
-
+    @Override
+    public void readCustom(ByteBuffer byteBuffer) {
+        byteBuffer.readBoolean();
+    }
 }

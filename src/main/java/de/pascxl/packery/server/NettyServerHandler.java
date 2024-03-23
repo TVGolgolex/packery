@@ -26,12 +26,12 @@ package de.pascxl.packery.server;
 
 import de.golgolex.quala.scheduler.Scheduler;
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.internal.PacketOutAuthentication;
-import de.pascxl.packery.internal.PacketOutIdentityActive;
-import de.pascxl.packery.internal.PacketOutIdentityInactive;
+import de.pascxl.packery.internal.NettyPacketOutAuthentication;
+import de.pascxl.packery.internal.NettyPacketOutIdentityActive;
+import de.pascxl.packery.internal.NettyPacketOutIdentityInactive;
 import de.pascxl.packery.network.NettyTransmitter;
-import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.packet.defaults.relay.RoutingPacket;
+import de.pascxl.packery.packet.NettyPacket;
+import de.pascxl.packery.packet.defaults.relay.RoutingNettyPacket;
 import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
 import de.pascxl.packery.packet.router.RoutingResult;
 import io.netty5.channel.Channel;
@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 @Getter
-public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> {
+public class NettyServerHandler extends SimpleChannelInboundHandler<NettyPacket> {
 
     private final NettyServer server;
     private final List<NettyTransmitter> transmitters = new ArrayList<>();
@@ -56,20 +56,20 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, PacketBase msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, NettyPacket msg) throws Exception {
         Packery.debug(Level.INFO, this.getClass(), "messageReceived: " + msg.getClass().getSimpleName());
 
-        if (msg instanceof PacketOutAuthentication authPacket) {
+        if (msg instanceof NettyPacketOutAuthentication authPacket) {
             if (unauthenticated.stream().anyMatch(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()))) {
                 unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
                 var authenticatedTransmitter = new NettyTransmitter(authPacket.channelIdentity(), ctx.channel());
 
                 var otherIdentities = this.transmitters.stream().map(NettyTransmitter::channelIdentity).toList();
                 Packery.debug(Level.INFO, this.getClass(), "Sending " + otherIdentities.size() + " to " + authPacket.channelIdentity());
-                ctx.channel().writeAndFlush(new PacketOutIdentityActive(authPacket.channelIdentity(), new ArrayList<>(otherIdentities)));
+                ctx.channel().writeAndFlush(new NettyPacketOutIdentityActive(authPacket.channelIdentity(), new ArrayList<>(otherIdentities)));
 
                 for (var transmitter : this.transmitters) {
-                    transmitter.sendPacketSync(new PacketOutIdentityActive(authPacket.channelIdentity()));
+                    transmitter.sendPacketSync(new NettyPacketOutIdentityActive(authPacket.channelIdentity()));
                     Packery.debug(Level.INFO, this.getClass(), "Sending new Id to " + transmitter.channelIdentity());
                 }
 
@@ -79,7 +79,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
             return;
         }
 
-        if (msg instanceof RoutingPacket routingPacket) {
+        if (msg instanceof RoutingNettyPacket routingPacket) {
             Packery.debug(Level.INFO, this.getClass(), "Received RelayPacket: " + routingPacket.getClass().getSimpleName() + " to: " + routingPacket.to() + " Transmitters: " + this.transmitters.size());
 
             Scheduler.runtimeScheduler().schedule(() -> {
@@ -90,11 +90,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
                             Packery.debug(Level.INFO, this.getClass(), "Send Packet RelayPacket: " + routingPacket.getClass().getSimpleName());
                             transmitter.sendPacketSync(routingPacket.packet());
                             ctx.channel().writeAndFlush(
-                                    new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.SUCCESS));
+                                    new RoutingResultReplyPacket(routingPacket.uniqueId(), RoutingResult.SUCCESS));
                         }, () -> {
                             Packery.debug(Level.INFO, this.getClass(), "No Channel with Id: " + routingPacket.to() + " found.");
                             ctx.channel().writeAndFlush(
-                                    new RoutingResultReplyPacket(routingPacket.packetId(), routingPacket.uniqueId(), RoutingResult.FAILED_NO_CLIENT));
+                                    new RoutingResultReplyPacket(routingPacket.uniqueId(), RoutingResult.FAILED_NO_CLIENT));
                         });
             }, 100);
 
@@ -123,7 +123,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<PacketBase> 
             unauthenticated.removeIf(channel -> channel.remoteAddress().equals(ctx.channel().remoteAddress()));
             for (var transmitter : transmitters) {
                 if (!transmitter.channel().remoteAddress().equals(ctx.channel().remoteAddress())) {
-                    transmitter.sendPacketSync(new PacketOutIdentityInactive(transmitter.channelIdentity()));
+                    transmitter.sendPacketSync(new NettyPacketOutIdentityInactive(transmitter.channelIdentity()));
                     Packery.debug(Level.INFO, this.getClass(), "Send PacketOutIdentityInit for " + ctx.channel().remoteAddress() + " to " + transmitter.channelIdentity().namespace() + "#" + transmitter.channelIdentity().uniqueId());
                 }
             }

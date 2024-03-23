@@ -1,4 +1,4 @@
-package de.pascxl.packery.internal;
+package de.pascxl.test.fun.test;
 
 /*
  * MIT License
@@ -24,24 +24,11 @@ package de.pascxl.packery.internal;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.network.ChannelIdentity;
-import lombok.Getter;
+import de.golgolex.quala.json.document.JsonDocument;
+import de.pascxl.packery.packet.defaults.document.JsonNettyPacket;
 
-@Getter
-public class PacketOutAuthentication extends AbstractIdentityPacket {
-
-    public PacketOutAuthentication(ChannelIdentity channelIdentity) {
-        super(-400, channelIdentity);
-    }
-
-    @Override
-    public void writeCustom(ByteBuffer byteBuffer) {
-
-    }
-
-    @Override
-    public void readCustom(ByteBuffer byteBuffer) {
-
+public class TestNettyPacket extends JsonNettyPacket {
+    public TestNettyPacket(JsonDocument jsonDocument) {
+        super(jsonDocument);
     }
 }

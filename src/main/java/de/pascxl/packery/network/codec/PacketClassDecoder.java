@@ -3,7 +3,7 @@ package de.pascxl.packery.network.codec;
 /*
  * MIT License
  *
- * Copyright (c) 2024 Mario Kurz
+ * Copyright (c) 2024 00:53 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,44 +37,39 @@ import lombok.AllArgsConstructor;
 import java.util.logging.Level;
 
 @AllArgsConstructor
-public class PacketInDecoder extends ByteToMessageDecoder {
+public class PacketClassDecoder extends ByteToMessageDecoder {
 
     private final PacketManager packetManager;
     private final String providerName;
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, Buffer in) throws Exception {
-/*
+    protected void decode(ChannelHandlerContext channelHandlerContext, Buffer buffer) throws Exception {
+
         try {
-            var byteBuffer = new ByteBuffer(in);
+            var byteBuffer = new ByteBuffer(buffer);
             var packetClassName = byteBuffer.readString();
             var packetClass = Class.forName(packetClassName);
-            var packetInstance = (NettyPacket) Allocator.unsafeAllocation(packetClass);
+            var packet = (NettyPacket) Allocator.unsafeAllocation(packetClass);
 
-            if (packetInstance == null) {
+            if (packet == null) {
                 Packery.log(Level.SEVERE, this.getClass(), providerName + ":" + "PacketInstance is null");
                 return;
             }
 
-            var packetId = byteBuffer.readLong();
             var packetUUID = byteBuffer.readUUID();
+            packet.uniqueId((packetUUID.equals(Packery.SYSTEM_UUID) ? null : packetUUID));
 
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readLong: packetId " + packetClass.getSimpleName());
-            packetInstance.packetId(packetId);
-
-            if (!this.packetManager.isPacketAllow(packetInstance)) {
-                Packery.log(Level.SEVERE, this.getClass(), providerName + ":" + "The channel {0} tries to send a packet which is not allowed: PacketId: {1}", ctx.channel().remoteAddress(), packetId);
+            if (!this.packetManager.isPacketAllow(packet)) {
+                Packery.log(Level.SEVERE, this.getClass(), providerName + ": " + "The channel {0} tries to send a packet which is not allowed: PacketId: {1}", channelHandlerContext.channel().remoteAddress(), packet.getClass().getName());
                 return;
             }
 
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: readUUID: uniqueId " + packetClass.getSimpleName());
-            packetInstance.uniqueId((packetUUID.equals(Packery.SYSTEM_UUID) ? null : packetUUID));
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "decode: read: byteBuffer " + packetClass.getSimpleName());
-            packetInstance.read(byteBuffer);
-            ctx.fireChannelRead(packetInstance);
-            Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "After read, length: {0}", in.readableBytes());
+            packet.read(byteBuffer);
+            Packery.debug(Level.INFO, this.getClass(), "Read Packet: " + packet.getClass().getName());
+            channelHandlerContext.fireChannelRead(packet);
         } catch (Exception exception) {
             Packery.log(Level.SEVERE, this.getClass(), exception.getMessage());
-        }*/
+        }
+
     }
 }

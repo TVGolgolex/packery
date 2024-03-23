@@ -31,9 +31,9 @@ import io.netty5.channel.ChannelHandlerContext;
 
 import java.util.Map;
 
-public class TestPacketListener extends PacketReceiveListener<TestPacket> {
+public class TestPacketListener extends PacketReceiveListener<TestNettyPacket> {
     @Override
-    public void call(TestPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext) {
+    public void call(TestNettyPacket packet, PacketSender packetSender, ChannelHandlerContext channelHandlerContext) {
         for (Map.Entry<String, JsonElement> stringJsonElementEntry : packet.jsonDocument().jsonObject().entrySet()) {
             System.out.println(stringJsonElementEntry.getKey() + ": " + stringJsonElementEntry.getValue().toString());
         }

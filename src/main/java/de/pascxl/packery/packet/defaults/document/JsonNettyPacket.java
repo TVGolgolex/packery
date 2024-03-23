@@ -1,4 +1,4 @@
-package de.pascxl.test.fun.test.respond;
+package de.pascxl.packery.packet.defaults.document;
 
 /*
  * MIT License
@@ -24,31 +24,40 @@ package de.pascxl.test.fun.test.respond;
  * SOFTWARE.
  */
 
+import com.google.gson.JsonObject;
+import de.golgolex.quala.json.JsonUtils;
+import de.golgolex.quala.json.document.JsonDocument;
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.packet.defaults.request.RequestPacket;
+import de.pascxl.packery.packet.NettyPacket;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
-public class TestRequestPacket extends RequestPacket {
+public class JsonNettyPacket extends NettyPacket {
 
-    private String message;
+    private JsonDocument jsonDocument;
 
-    public TestRequestPacket(String message)
-    {
-        super(3);
-        this.message = message;
+    public JsonNettyPacket() {
+        this.jsonDocument = new JsonDocument();
     }
 
+    public JsonNettyPacket(JsonDocument jsonDocument) {
+        this.jsonDocument = jsonDocument;
+    }
 
-    @Override
-    public void write(ByteBuffer out)
-    {
-        out.writeString(message);
+    public JsonNettyPacket(UUID uniqueId, JsonDocument jsonDocument) {
+        super(uniqueId);
+        this.jsonDocument = jsonDocument;
     }
 
     @Override
-    public void read(ByteBuffer in)
-    {
-        this.message = in.readString();
+    public void write(ByteBuffer out) {
+        out.writeString(this.jsonDocument.jsonObjectToString());
+    }
+
+    @Override
+    public void read(ByteBuffer in) {
+        this.jsonDocument = new JsonDocument(JsonUtils.JSON.fromJson(in.readString(), JsonObject.class));
     }
 }

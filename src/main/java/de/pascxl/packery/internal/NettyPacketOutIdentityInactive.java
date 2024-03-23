@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.defaults.request;
+package de.pascxl.packery.internal;
 
 /*
  * MIT License
@@ -24,13 +24,23 @@ package de.pascxl.packery.packet.defaults.request;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.buffer.ByteBuffer;
+import de.pascxl.packery.network.ChannelIdentity;
+import lombok.NonNull;
 
-public abstract class RequestPacket extends PacketBase {
+public class NettyPacketOutIdentityInactive extends AbstractIdentityNettyPacket {
 
-    public RequestPacket(long packetId)
-    {
-        super(packetId);
+    public NettyPacketOutIdentityInactive(@NonNull ChannelIdentity channelIdentity) {
+        super(channelIdentity);
     }
 
+    @Override
+    public void writeCustom(ByteBuffer byteBuffer) {
+
+    }
+
+    @Override
+    public void readCustom(ByteBuffer byteBuffer) {
+
+    }
 }

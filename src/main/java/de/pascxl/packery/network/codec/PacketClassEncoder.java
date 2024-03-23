@@ -3,7 +3,7 @@ package de.pascxl.packery.network.codec;
 /*
  * MIT License
  *
- * Copyright (c) 2024 Mario Kurz
+ * Copyright (c) 2024 00:29 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,33 +36,29 @@ import lombok.AllArgsConstructor;
 import java.util.logging.Level;
 
 @AllArgsConstructor
-public class PacketOutEncoder extends MessageToByteEncoder<NettyPacket> {
+public class PacketClassEncoder extends MessageToByteEncoder<NettyPacket> {
 
     private final PacketManager packetManager;
     private final String providerName;
 
     @Override
-    protected Buffer allocateBuffer(ChannelHandlerContext ctx, NettyPacket msg) throws Exception {
-        return ctx.bufferAllocator().allocate(0);
+    protected Buffer allocateBuffer(ChannelHandlerContext channelHandlerContext, NettyPacket nettyPacket) throws Exception {
+        return channelHandlerContext.bufferAllocator().allocate(0);
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, NettyPacket msg, Buffer out) throws Exception {
-/*
-        if (!this.packetManager.isPacketAllow(msg)) {
-            Packery.log(Level.SEVERE, this.getClass(), providerName + ":" + "The channel {0} tries to send a packet which is not allowed: PacketId: {1}", ctx.channel().remoteAddress(), msg.packetId());
+    protected void encode(ChannelHandlerContext channelHandlerContext, NettyPacket nettyPacket, Buffer buffer) throws Exception {
+
+        if (!this.packetManager.isPacketAllow(nettyPacket)) {
+            Packery.log(Level.SEVERE, this.getClass(), providerName + ": " + "The channel {0} tries to send a packet which is not allowed: PacketId: {1}", channelHandlerContext.channel().remoteAddress(), nettyPacket.getClass().getName());
             return;
         }
 
-        var byteBuffer = new ByteBuffer(out);
-        byteBuffer.writeString(msg.getClass().getName());
-        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "encode: writeString: className " + msg.getClass().getSimpleName());
-        byteBuffer.writeLong(msg.packetId());
-        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "encode: writeLong: packetId " + msg.getClass().getSimpleName());
-        byteBuffer.writeUUID(msg.uniqueId() == null ? Packery.SYSTEM_UUID : msg.uniqueId());
-        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "encode: writeUUID: uniqueId " + msg.getClass().getSimpleName());
-        msg.write(byteBuffer);
-        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "encode: write " + msg.getClass().getSimpleName());
-        Packery.debug(Level.INFO, this.getClass(), providerName + ":" + "After write, length: {0}", out.readableBytes());*/
+        var byteBuffer = new ByteBuffer(buffer);
+        byteBuffer.writeString(nettyPacket.getClass().getName());
+        byteBuffer.writeUUID(nettyPacket.uniqueId() == null ? Packery.SYSTEM_UUID : nettyPacket.uniqueId());
+        nettyPacket.write(byteBuffer);
+        Packery.debug(Level.INFO, this.getClass(), "Write Packet: " + nettyPacket.getClass().getName());
+
     }
 }

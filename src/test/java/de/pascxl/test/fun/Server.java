@@ -26,7 +26,9 @@ package de.pascxl.test.fun;
 
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.server.NettyServer;
+import de.pascxl.test.fun.test.TestNettyPacket;
 import de.pascxl.test.fun.test.TestPacketListener;
+import de.pascxl.test.fun.test.respond.TestQueryNettyPacket;
 import de.pascxl.test.fun.test.respond.TestRequestPacketListener;
 
 public class Server {
@@ -38,11 +40,11 @@ public class Server {
 
         nettyServer.connect("0.0.0.0", 27785, false);
 
-        nettyServer.packetManager().allowPacket(4);
-        nettyServer.packetManager().registerPacketHandler(4, TestPacketListener.class);
+        nettyServer.packetManager().allowPacket(TestNettyPacket.class);
+        nettyServer.packetManager().registerPacketHandler(TestNettyPacket.class.getName(), TestPacketListener.class);
 
-        nettyServer.packetManager().allowPacket(3);
-        nettyServer.packetManager().registerPacketHandler(3, TestRequestPacketListener.class);
+        nettyServer.packetManager().allowPacket(TestQueryNettyPacket.class);
+        nettyServer.packetManager().registerPacketHandler(TestQueryNettyPacket.class.getName(), TestRequestPacketListener.class);
 
     }
 }

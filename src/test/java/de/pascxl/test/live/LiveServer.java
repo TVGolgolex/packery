@@ -18,6 +18,7 @@ package de.pascxl.test.live;
 
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.server.NettyServer;
+import de.pascxl.packery.utils.BypassCheck;
 
 public class LiveServer {
 
@@ -33,7 +34,7 @@ public class LiveServer {
             return;
         }
 
-        nettyServer.packetManager().allowPacket(774090777346262697L);
+        nettyServer.packetManager().allowPacket(BypassCheck.class);
 
     }
 

@@ -24,19 +24,19 @@ package de.pascxl.packery.packet.listener;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.PacketBase;
-import de.pascxl.packery.packet.defaults.request.RequestPacket;
-import de.pascxl.packery.packet.defaults.request.RespondPacket;
+import de.pascxl.packery.packet.NettyPacket;
+import de.pascxl.packery.packet.defaults.request.QueryNettyPacket;
+import de.pascxl.packery.packet.defaults.request.RespondNettyPacket;
 import de.pascxl.packery.packet.sender.PacketSender;
 import lombok.NonNull;
 
-public abstract class PacketRespondListener<T extends RequestPacket> extends PacketReceiveListener<T> {
+public abstract class PacketRespondListener<T extends QueryNettyPacket> extends PacketReceiveListener<T> {
 
-    public <R extends PacketBase> RespondPacket buildRespond(@NonNull R packet) {
-        return new RespondPacket(this.packetId, this.uniqueId, packet);
+    public <R extends NettyPacket> RespondNettyPacket buildRespond(@NonNull R packet) {
+        return new RespondNettyPacket(this.uniqueId, packet);
     }
 
-    public void respond(@NonNull RespondPacket respondPacket, @NonNull PacketSender packetSender) {
+    public void respond(@NonNull RespondNettyPacket respondPacket, @NonNull PacketSender packetSender) {
         packetSender.sendPacketSync(respondPacket);
     }
 

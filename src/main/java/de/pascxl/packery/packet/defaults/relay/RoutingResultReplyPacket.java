@@ -17,19 +17,18 @@ package de.pascxl.packery.packet.defaults.relay;
  */
 
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import de.pascxl.packery.packet.router.RoutingResult;
 import lombok.Getter;
 
 import java.util.UUID;
 
 @Getter
-public class RoutingResultReplyPacket extends PacketBase {
+public class RoutingResultReplyPacket extends NettyPacket {
 
     private RoutingResult routingResult;
 
-    public RoutingResultReplyPacket(long packetId, UUID uniqueId, RoutingResult routingResult) {
-        super(packetId, uniqueId);
+    public RoutingResultReplyPacket(UUID uniqueId, RoutingResult routingResult) {
         this.routingResult = routingResult;
     }
 

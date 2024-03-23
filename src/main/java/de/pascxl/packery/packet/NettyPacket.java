@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.sender;
+package de.pascxl.packery.packet;
 
 /*
  * MIT License
@@ -24,23 +24,33 @@ package de.pascxl.packery.packet.sender;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.packet.NettyPacket;
+import de.pascxl.packery.buffer.ByteBuffer;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.UUID;
 
-public abstract class PacketSender {
+@Setter
+@Getter
+public abstract class NettyPacket {
 
-    private final Queue<?> queue = new ConcurrentLinkedQueue<>();
+//    private long packetId;
+    private UUID uniqueId;
 
-    public abstract <P extends NettyPacket> void writePacket(P packet);
+/*    public NettyPacket(long packetId) {
+        this.packetId = packetId;
+    }*/
 
-    public abstract void flush();
+    public NettyPacket() {
+    }
 
-    public abstract <P extends NettyPacket> void sendPacketAsync(P packet);
+    public NettyPacket(UUID uniqueId) {
+//        this.packetId = packetId;
+        this.uniqueId = uniqueId;
+    }
 
-    public abstract <P extends NettyPacket> void sendPacket(P packet);
+    public abstract void write(ByteBuffer out);
 
-    public abstract <P extends NettyPacket> void sendPacketSync(P packet);
+    public abstract void read(ByteBuffer in);
 
 }

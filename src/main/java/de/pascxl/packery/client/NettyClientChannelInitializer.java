@@ -25,14 +25,12 @@ package de.pascxl.packery.client;
  */
 
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.network.codec.PacketInDecoder;
-import de.pascxl.packery.network.codec.PacketOutEncoder;
+import de.pascxl.packery.network.codec.PacketClassDecoder;
+import de.pascxl.packery.network.codec.PacketClassEncoder;
 import io.netty5.channel.Channel;
-import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.ChannelInitializer;
 import lombok.AllArgsConstructor;
 
-import java.io.IOException;
 import java.util.logging.Level;
 
 @AllArgsConstructor
@@ -46,9 +44,14 @@ public class NettyClientChannelInitializer extends ChannelInitializer<Channel> {
             Packery.log(Level.SEVERE, this.getClass(), "Channel is null");
             return;
         }
-        ch.pipeline().addLast(new PacketInDecoder(this.client.packetManager(), this.client.name()),
+        ch.pipeline().addLast(
+                new PacketClassDecoder(this.client.packetManager, this.client.name),
+                new PacketClassEncoder(this.client.packetManager, this.client.name),
+                new NettyClientHandler(client)
+        );
+        /*ch.pipeline().addLast(new PacketInDecoder(this.client.packetManager(), this.client.name()),
                 new PacketOutEncoder(this.client.packetManager(), this.client.name()),
-                new NettyClientHandler(client));
+                new NettyClientHandler(client));*/
     }
 
 }

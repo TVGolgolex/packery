@@ -1,4 +1,4 @@
-package de.pascxl.packery.internal;
+package de.pascxl.packery.packet.defaults.request;
 
 /*
  * MIT License
@@ -24,35 +24,7 @@ package de.pascxl.packery.internal;
  * SOFTWARE.
  */
 
-import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.network.ChannelIdentity;
-import de.pascxl.packery.packet.PacketBase;
-import lombok.Getter;
-import lombok.NonNull;
+import de.pascxl.packery.packet.NettyPacket;
 
-@Getter
-public abstract class AbstractIdentityPacket extends PacketBase {
-
-    private ChannelIdentity channelIdentity;
-
-    public AbstractIdentityPacket(long packetId, @NonNull ChannelIdentity channelIdentity) {
-        super(packetId);
-        this.channelIdentity = channelIdentity;
-    }
-
-    @Override
-    public void write(ByteBuffer out) {
-        out.writeString(channelIdentity.namespace()).writeUUID(channelIdentity.uniqueId());
-        writeCustom(out);
-    }
-
-    @Override
-    public void read(ByteBuffer in) {
-        this.channelIdentity = new ChannelIdentity(in.readString(), in.readUUID());
-        readCustom(in);
-    }
-
-    public abstract void writeCustom(ByteBuffer byteBuffer);
-
-    public abstract void readCustom(ByteBuffer byteBuffer);
+public abstract class QueryNettyPacket extends NettyPacket {
 }

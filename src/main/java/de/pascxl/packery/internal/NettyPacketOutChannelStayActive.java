@@ -25,16 +25,15 @@ package de.pascxl.packery.internal;
  */
 
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import lombok.Getter;
 
 @Getter
-public class PacketOutChannelStayActive extends PacketBase {
+public class NettyPacketOutChannelStayActive extends NettyPacket {
 
     private long time;
 
-    public PacketOutChannelStayActive() {
-        super(-412);
+    public NettyPacketOutChannelStayActive() {
         time = System.currentTimeMillis();
     }
 

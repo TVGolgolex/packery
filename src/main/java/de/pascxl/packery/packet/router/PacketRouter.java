@@ -27,7 +27,7 @@ package de.pascxl.packery.packet.router;
 import de.golgolex.quala.scheduler.Scheduler;
 import de.golgolex.quala.utils.data.Value;
 import de.pascxl.packery.network.NettyTransmitter;
-import de.pascxl.packery.packet.defaults.relay.RoutingPacket;
+import de.pascxl.packery.packet.defaults.relay.RoutingNettyPacket;
 import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -43,7 +43,7 @@ public class PacketRouter {
     private final Map<UUID, Value<RoutingResult>> result = new ConcurrentHashMap<>(0);
     private final Scheduler executorService = new Scheduler(1);
 
-    public CompletableFuture<RoutingResult> routeFuture(RoutingPacket routingPacket, NettyTransmitter transmitter) {
+    public CompletableFuture<RoutingResult> routeFuture(RoutingNettyPacket routingPacket, NettyTransmitter transmitter) {
         var packetUniqueId = UUID.randomUUID();
         routingPacket.uniqueId(packetUniqueId);
 
@@ -60,7 +60,7 @@ public class PacketRouter {
         return resultFuture;
     }
 
-    public RoutingResult routeUnsafe(RoutingPacket routingPacket, NettyTransmitter transmitter) {
+    public RoutingResult routeDirect(RoutingNettyPacket routingPacket, NettyTransmitter transmitter) {
         var packetUniqueId = UUID.randomUUID();
         routingPacket.uniqueId(packetUniqueId);
 

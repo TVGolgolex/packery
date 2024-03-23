@@ -25,14 +25,11 @@ package de.pascxl.packery.server;
  */
 
 import com.github.golgolex.eventum.EventManager;
-import de.pascxl.packery.Packery;
 import de.pascxl.packery.events.ChannelInitEvent;
-import de.pascxl.packery.network.codec.PacketInDecoder;
-import de.pascxl.packery.network.codec.PacketOutEncoder;
+import de.pascxl.packery.network.codec.PacketClassDecoder;
+import de.pascxl.packery.network.codec.PacketClassEncoder;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelInitializer;
-
-import java.util.logging.Level;
 
 public class NettyServerChannelInitializer extends ChannelInitializer<Channel> {
 
@@ -46,12 +43,14 @@ public class NettyServerChannelInitializer extends ChannelInitializer<Channel> {
 
     @Override
     protected void initChannel(Channel ch) throws Exception {
-        Packery.log(Level.INFO, "Initialize Channel: " + ch.remoteAddress().toString());
         this.nettyServerHandler.unauthenticated().add(ch);
-        Packery.debug(Level.INFO, this.getClass(), "Added channel (" + ch.remoteAddress().toString() + ") to unauthenticated");
-        ch.pipeline().addLast(new PacketInDecoder(this.server.packetManager(), this.server.name()), new PacketOutEncoder(this.server.packetManager(), this.server.name()), nettyServerHandler);
-        Packery.debug(Level.INFO, this.getClass(), "Added channel (" + ch.remoteAddress().toString() + ") pipelines");
+
+        ch.pipeline().addLast(
+                new PacketClassDecoder(this.server.packetManager, this.server.name),
+                new PacketClassEncoder(this.server.packetManager, this.server.name),
+                nettyServerHandler
+        );
+
         EventManager.call(new ChannelInitEvent(ch));
-        Packery.debug(Level.INFO, this.getClass(), "EventCall ChannelInit: (" + ch.remoteAddress().toString() + ")");
     }
 }

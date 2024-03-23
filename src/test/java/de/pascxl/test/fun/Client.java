@@ -25,15 +25,14 @@ package de.pascxl.test.fun;
  */
 
 import de.golgolex.quala.json.document.JsonDocument;
-import de.golgolex.quala.scheduler.Scheduler;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.InactiveAction;
 import de.pascxl.packery.packet.queue.PacketQueue;
-import de.pascxl.test.fun.test.TestPacket;
-import de.pascxl.test.fun.test.respond.TestRequestPacket;
+import de.pascxl.test.fun.test.TestNettyPacket;
+import de.pascxl.test.fun.test.respond.TestQueryNettyPacket;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -47,21 +46,21 @@ public class Client {
 
         nettyClient.connect("0.0.0.0", 27785, false);
 
-        nettyClient.packetManager().allowPacket(4);
-        nettyClient.packetManager().allowPacket(3);
+        nettyClient.packetManager().allowPacket(TestNettyPacket.class);
+        nettyClient.packetManager().allowPacket(TestQueryNettyPacket.class);
         nettyClient.stayActive();
 
         PacketQueue packetQueue = new PacketQueue(nettyClient.nettyTransmitter());
 
         for (int i = 0; i < 25; i++) {
-            TestPacket testPacket = new TestPacket(4, new JsonDocument());
+            TestNettyPacket testPacket = new TestNettyPacket(new JsonDocument());
             testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
             packetQueue.addPacket(testPacket);
         }
 
         packetQueue.sendDelay(10, TimeUnit.SECONDS, PacketQueue.Threading.ASYNC);
 
-        TestPacket testPacket = new TestPacket(4, new JsonDocument());
+        TestNettyPacket testPacket = new TestNettyPacket(new JsonDocument());
 
         for (int i = 0; i < 30; i++) {
             testPacket.jsonDocument().write(StringUtils.generateRandomString(7), StringUtils.generateRandomString(25));
@@ -69,18 +68,18 @@ public class Client {
 
         nettyClient.nettyTransmitter().sendPacketAsync(testPacket);
 
-        TestRequestPacket testRequestPacket = new TestRequestPacket("test");
+        TestQueryNettyPacket testRequestPacket = new TestQueryNettyPacket("test");
 
             var respondPacket = nettyClient.packetManager()
-                    .packetRequester()
-                    .queryUnsafe(testRequestPacket, nettyClient.nettyTransmitter());
+                    .packetQuery()
+                    .queryDirect(testRequestPacket, nettyClient.nettyTransmitter());
 
             if (respondPacket == null) {
                 System.out.println("result is null");
                 return;
             }
 
-            System.out.println(((TestPacket) respondPacket.packet()).jsonDocument().readString("test"));
+            System.out.println(((TestNettyPacket) respondPacket.packet()).jsonDocument().readString("test"));
 
 /*        nettyClient.packetManager()
                 .packetRequester()

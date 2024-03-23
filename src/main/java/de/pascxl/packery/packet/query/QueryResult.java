@@ -1,4 +1,9 @@
-package de.pascxl.test.fun.test;
+package de.pascxl.packery.packet.query;
+
+import de.pascxl.packery.packet.NettyPacket;
+
+
+import java.util.UUID;
 
 /*
  * MIT License
@@ -24,11 +29,5 @@ package de.pascxl.test.fun.test;
  * SOFTWARE.
  */
 
-import de.golgolex.quala.json.document.JsonDocument;
-import de.pascxl.packery.packet.defaults.document.JsonPacket;
-
-public class TestPacket extends JsonPacket {
-    public TestPacket(long packetId, JsonDocument jsonDocument) {
-        super(packetId, jsonDocument);
-    }
+public record QueryResult<P extends NettyPacket>(UUID uniqueId, P resultPacket) {
 }

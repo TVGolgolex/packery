@@ -1,4 +1,4 @@
-package de.pascxl.test.live.packet;
+package de.pascxl.test.fun.test.respond;
 
 /*
  * MIT License
@@ -24,11 +24,29 @@ package de.pascxl.test.live.packet;
  * SOFTWARE.
  */
 
-import de.golgolex.quala.json.document.JsonDocument;
-import de.pascxl.packery.packet.defaults.document.JsonPacket;
+import de.pascxl.packery.buffer.ByteBuffer;
+import de.pascxl.packery.packet.defaults.request.QueryNettyPacket;
+import lombok.Getter;
 
-public class TestPacket extends JsonPacket {
-    public TestPacket(long packetId, JsonDocument jsonDocument) {
-        super(packetId, jsonDocument);
+@Getter
+public class TestQueryNettyPacket extends QueryNettyPacket {
+
+    private String message;
+
+    public TestQueryNettyPacket(String message)
+    {
+        this.message = message;
+    }
+
+    @Override
+    public void write(ByteBuffer out)
+    {
+        out.writeString(message);
+    }
+
+    @Override
+    public void read(ByteBuffer in)
+    {
+        this.message = in.readString();
     }
 }

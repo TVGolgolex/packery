@@ -1,4 +1,4 @@
-package de.pascxl.packery.internal;
+package de.pascxl.packery.packet.defaults.request;
 
 /*
  * MIT License
@@ -24,23 +24,49 @@ package de.pascxl.packery.internal;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.reflections.Allocator;
+import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.network.ChannelIdentity;
-import lombok.NonNull;
+import de.pascxl.packery.packet.NettyPacket;
+import lombok.Getter;
 
-public class PacketOutIdentityInactive extends AbstractIdentityPacket {
+import java.util.UUID;
+import java.util.logging.Level;
 
-    public PacketOutIdentityInactive(@NonNull ChannelIdentity channelIdentity) {
-        super(-411, channelIdentity);
+@Getter
+public class RespondNettyPacket extends NettyPacket {
+
+    private NettyPacket packet;
+
+    public RespondNettyPacket(UUID uniqueId, NettyPacket packet)
+    {
+        super(uniqueId);
+        this.packet = packet;
     }
 
     @Override
-    public void writeCustom(ByteBuffer byteBuffer) {
-
+    public void write(ByteBuffer out)
+    {
+        out.writeString(packet.getClass().getName());
+        packet.write(out);
     }
 
     @Override
-    public void readCustom(ByteBuffer byteBuffer) {
+    public void read(ByteBuffer in)
+    {
+        try {
+            var packetClass = Class.forName(in.readString());
+            this.packet = (NettyPacket) Allocator.unsafeAllocation(packetClass);
 
+            if (packet == null) {
+                Packery.log(Level.SEVERE, this.getClass(), "Packet cannot be allocated");
+                return;
+            }
+
+            this.packet.read(in);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
+
 }

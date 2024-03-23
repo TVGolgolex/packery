@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.request;
+package de.pascxl.packery.packet.query;
 
 /*
  * MIT License
@@ -27,10 +27,10 @@ package de.pascxl.packery.packet.request;
 import de.golgolex.quala.scheduler.Scheduler;
 import de.golgolex.quala.utils.data.Value;
 import de.pascxl.packery.network.NettyTransmitter;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import de.pascxl.packery.packet.PacketManager;
-import de.pascxl.packery.packet.defaults.request.RequestPacket;
-import de.pascxl.packery.packet.defaults.request.RespondPacket;
+import de.pascxl.packery.packet.defaults.request.QueryNettyPacket;
+import de.pascxl.packery.packet.defaults.request.RespondNettyPacket;
 import lombok.Getter;
 
 import java.util.Map;
@@ -39,38 +39,38 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
-public class PacketRequester {
+public class PacketQuery {
 
     private final PacketManager packetManager;
-    private final Map<UUID, Value<RequestResult<?>>> waiting = new ConcurrentHashMap<>(0);
+    private final Map<UUID, Value<QueryResult<?>>> waiting = new ConcurrentHashMap<>(0);
     private final Scheduler executorService = new Scheduler(1);
 
-    public PacketRequester(PacketManager packetManager) {
+    public PacketQuery(PacketManager packetManager) {
         this.packetManager = packetManager;
     }
 
-    public <P extends RequestPacket> CompletableFuture<RespondPacket> queryFuture(P packet, NettyTransmitter transmitter) {
+    public <P extends QueryNettyPacket> CompletableFuture<RespondNettyPacket> queryFuture(P packet, NettyTransmitter transmitter) {
         var packetUniqueId = UUID.randomUUID();
         packet.uniqueId(packetUniqueId);
 
-        var resultFuture = new CompletableFuture<RespondPacket>();
-        Value<RequestResult<?>> value = new Value<>(null);
+        var resultFuture = new CompletableFuture<RespondNettyPacket>();
+        Value<QueryResult<?>> value = new Value<>(null);
         waiting.put(packetUniqueId, value);
         executorService.schedule(() -> transmitter.sendPacket(packet));
 
         executorService.schedule(() -> {
-            Value<RequestResult<?>> resultValue = waiting.get(packetUniqueId);
+            Value<QueryResult<?>> resultValue = waiting.get(packetUniqueId);
             waiting.remove(packetUniqueId);
-            resultFuture.complete(resultValue != null && resultValue.value() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null);
+            resultFuture.complete(resultValue != null && resultValue.value() != null ? (RespondNettyPacket) castResult(resultValue).resultPacket() : null);
         }, 5000);
         return resultFuture;
     }
 
-    public <P extends RequestPacket> RespondPacket queryUnsafe(P packet, NettyTransmitter transmitter) {
+    public <P extends QueryNettyPacket> RespondNettyPacket queryDirect(P packet, NettyTransmitter transmitter) {
         var packetUniqueId = UUID.randomUUID();
         packet.uniqueId(packetUniqueId);
 
-        Value<RequestResult<?>> value = new Value<>(null);
+        Value<QueryResult<?>> value = new Value<>(null);
         waiting.put(packetUniqueId, value);
         executorService.schedule(() -> transmitter.sendPacket(packet));
 
@@ -84,22 +84,22 @@ public class PacketRequester {
         }
 
         if (i >= 4999) {
-            waiting.get(packetUniqueId).value(new RequestResult<>(packetUniqueId, null));
+            waiting.get(packetUniqueId).value(new QueryResult<>(packetUniqueId, null));
         }
 
-        Value<RequestResult<?>> resultValue = waiting.get(packetUniqueId);
+        Value<QueryResult<?>> resultValue = waiting.get(packetUniqueId);
         waiting.remove(packetUniqueId);
-        return resultValue != null && resultValue.value() != null ? (RespondPacket) castResult(resultValue).resultPacket() : null;
+        return resultValue != null && resultValue.value() != null ? (RespondNettyPacket) castResult(resultValue).resultPacket() : null;
     }
 
     @SuppressWarnings("unchecked")
-    private <PR extends PacketBase> RequestResult<PR> castResult(Value<RequestResult<?>> resultValue) {
-        return (RequestResult<PR>) resultValue.value();
+    private <PR extends NettyPacket> QueryResult<PR> castResult(Value<QueryResult<?>> resultValue) {
+        return (QueryResult<PR>) resultValue.value();
     }
 
-    public void dispatch(PacketBase packet) {
-        RequestResult<PacketBase> requestResult = new RequestResult<>(packet.uniqueId(), packet);
-        Value<RequestResult<?>> waitingQuery = waiting.get(packet.uniqueId());
-        waitingQuery.value(requestResult);
+    public void dispatch(NettyPacket packet) {
+        QueryResult<NettyPacket> queryResult = new QueryResult<>(packet.uniqueId(), packet);
+        Value<QueryResult<?>> waitingQuery = waiting.get(packet.uniqueId());
+        waitingQuery.value(queryResult);
     }
 }

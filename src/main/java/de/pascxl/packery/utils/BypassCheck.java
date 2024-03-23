@@ -1,9 +1,9 @@
-package de.pascxl.packery.packet.defaults.document;
+package de.pascxl.packery.utils;
 
 /*
  * MIT License
  *
- * Copyright (c) 2024 Mario Kurz
+ * Copyright (c) 2024 00:43 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,42 +24,17 @@ package de.pascxl.packery.packet.defaults.document;
  * SOFTWARE.
  */
 
-import com.google.gson.JsonObject;
-import de.golgolex.quala.json.JsonUtils;
-import de.golgolex.quala.json.document.JsonDocument;
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.packet.PacketBase;
-import lombok.Getter;
+import de.pascxl.packery.packet.NettyPacket;
 
-import java.util.UUID;
-
-@Getter
-public class JsonPacket extends PacketBase {
-
-    private JsonDocument jsonDocument;
-
-    public JsonPacket(long packetId) {
-        super(packetId);
-        this.jsonDocument = new JsonDocument();
-    }
-
-    public JsonPacket(long packetId, JsonDocument jsonDocument) {
-        super(packetId);
-        this.jsonDocument = jsonDocument;
-    }
-
-    public JsonPacket(long packetId, UUID uniqueId, JsonDocument jsonDocument) {
-        super(packetId, uniqueId);
-        this.jsonDocument = jsonDocument;
-    }
-
+public class BypassCheck extends NettyPacket {
     @Override
     public void write(ByteBuffer out) {
-        out.writeString(this.jsonDocument.jsonObjectToString());
+
     }
 
     @Override
     public void read(ByteBuffer in) {
-        this.jsonDocument = new JsonDocument(JsonUtils.JSON.fromJson(in.readString(), JsonObject.class));
+
     }
 }

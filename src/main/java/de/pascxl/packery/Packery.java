@@ -37,7 +37,7 @@ public class Packery {
     private static final Logger logger = Logger.getLogger("Packery");
     public static org.slf4j.Logger slf4jLogger;
     public static ConsoleColor errorConsoleColor = ConsoleColor.RED;
-    public static ConsoleColor warnConsoleColor = ConsoleColor.RED;
+    public static ConsoleColor warnConsoleColor = ConsoleColor.ORANGE;
     public static ConsoleColor debugConsoleColor = ConsoleColor.YELLOW;
     public static ConsoleColor normalConsoleColor = ConsoleColor.AQUA;
 

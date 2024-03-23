@@ -25,11 +25,11 @@ package de.pascxl.packery.client;
  */
 
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.internal.PacketOutAuthentication;
-import de.pascxl.packery.internal.PacketOutIdentityActive;
-import de.pascxl.packery.internal.PacketOutIdentityInactive;
+import de.pascxl.packery.internal.NettyPacketOutAuthentication;
+import de.pascxl.packery.internal.NettyPacketOutIdentityActive;
+import de.pascxl.packery.internal.NettyPacketOutIdentityInactive;
 import de.pascxl.packery.network.NettyTransmitter;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import de.pascxl.packery.packet.defaults.relay.RoutingResultReplyPacket;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
@@ -39,15 +39,15 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 @AllArgsConstructor
-public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> {
+public class NettyClientHandler extends SimpleChannelInboundHandler<NettyPacket> {
 
     private final NettyClient client;
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, PacketBase msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, NettyPacket msg) throws Exception {
         Packery.debug(Level.INFO, this.getClass(), "messageReceived: " + msg.getClass().getSimpleName());
 
-        if (msg instanceof PacketOutIdentityActive activePacket) {
+        if (msg instanceof NettyPacketOutIdentityActive activePacket) {
             Packery.debug(Level.INFO, this.getClass(), "PacketOutIdentityActive Channel-Identity: {0}", activePacket.channelIdentity());
             if (activePacket.other() != null) {
                 Packery.debug(Level.INFO, this.getClass(), "PacketOutIdentityActive init other Ids");
@@ -63,7 +63,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> 
             return;
         }
 
-        if (msg instanceof PacketOutIdentityInactive inactive) {
+        if (msg instanceof NettyPacketOutIdentityInactive inactive) {
             if (client.channelIdentities().stream().anyMatch(channelIdentity -> channelIdentity.equals(inactive.channelIdentity()))) {
                 client.channelIdentities().removeIf(channelIdentity -> channelIdentity.equals(inactive.channelIdentity()));
                 Packery.debug(Level.INFO, this.getClass(), "Stopped Channel-Identity: {0}", inactive.channelIdentity().namespace() + "#" + inactive.channelIdentity().uniqueId());
@@ -82,7 +82,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<PacketBase> 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         this.client.nettyTransmitter = new NettyTransmitter(this.client.channelIdentity(), ctx.channel());
-        this.client.nettyTransmitter().channel().writeAndFlush(new PacketOutAuthentication(this.client.channelIdentity()));
+        this.client.nettyTransmitter().channel().writeAndFlush(new NettyPacketOutAuthentication(this.client.channelIdentity()));
     }
 
     @Override

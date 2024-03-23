@@ -26,7 +26,7 @@ package de.pascxl.packery.packet.queue;
 
 import de.golgolex.quala.scheduler.Scheduler;
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import de.pascxl.packery.packet.sender.PacketSender;
 import lombok.NonNull;
 
@@ -38,14 +38,14 @@ import java.util.logging.Level;
 public class PacketQueue {
 
     private final PacketSender packetSender;
-    private final Queue<PacketBase> queue = new LinkedList<>();
+    private final Queue<NettyPacket> queue = new LinkedList<>();
     private boolean sending;
 
     public PacketQueue(PacketSender packetSender) {
         this.packetSender = packetSender;
     }
 
-    public <P extends PacketBase> PacketQueue addPacket(@NonNull P packet) {
+    public <P extends NettyPacket> PacketQueue addPacket(@NonNull P packet) {
         queue.add(packet);
         return this;
     }
@@ -63,10 +63,11 @@ public class PacketQueue {
             }
             sending = true;
             while (!queue.isEmpty()) {
+                var packet = queue.poll();
                 switch (threading) {
-                    case SYNC -> packetSender.sendPacketSync(queue.poll());
-                    case ASYNC -> packetSender.sendPacketAsync(queue.poll());
-                    case UNSET -> packetSender.sendPacket(queue.poll());
+                    case SYNC -> packetSender.sendPacketSync(packet);
+                    case ASYNC -> packetSender.sendPacketAsync(packet);
+                    case UNSET -> packetSender.sendPacket(packet);
                 }
                 try {
                     Thread.sleep(10);
@@ -90,10 +91,11 @@ public class PacketQueue {
         }
         sending = true;
         while (!queue.isEmpty()) {
+            var packet = queue.poll();
             switch (threading) {
-                case SYNC -> packetSender.sendPacketSync(queue.poll());
-                case ASYNC -> packetSender.sendPacketAsync(queue.poll());
-                case UNSET -> packetSender.sendPacket(queue.poll());
+                case SYNC -> packetSender.sendPacketSync(packet);
+                case ASYNC -> packetSender.sendPacketAsync(packet);
+                case UNSET -> packetSender.sendPacket(packet);
             }
             try {
                 Thread.sleep(10);

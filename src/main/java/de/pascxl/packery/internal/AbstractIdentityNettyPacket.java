@@ -1,4 +1,4 @@
-package de.pascxl.packery.packet.defaults.request;
+package de.pascxl.packery.internal;
 
 /*
  * MIT License
@@ -24,49 +24,34 @@ package de.pascxl.packery.packet.defaults.request;
  * SOFTWARE.
  */
 
-import de.golgolex.quala.reflections.Allocator;
-import de.pascxl.packery.Packery;
 import de.pascxl.packery.buffer.ByteBuffer;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.network.ChannelIdentity;
+import de.pascxl.packery.packet.NettyPacket;
 import lombok.Getter;
-
-import java.util.UUID;
-import java.util.logging.Level;
+import lombok.NonNull;
 
 @Getter
-public class RespondPacket extends PacketBase {
+public abstract class AbstractIdentityNettyPacket extends NettyPacket {
 
-    private PacketBase packet;
+    private ChannelIdentity channelIdentity;
 
-    public RespondPacket(long packetId, UUID uniqueId, PacketBase packet)
-    {
-        super(packetId, uniqueId);
-        this.packet = packet;
+    public AbstractIdentityNettyPacket(@NonNull ChannelIdentity channelIdentity) {
+        this.channelIdentity = channelIdentity;
     }
 
     @Override
-    public void write(ByteBuffer out)
-    {
-        out.writeString(packet.getClass().getName());
-        packet.write(out);
+    public void write(ByteBuffer out) {
+        out.writeString(channelIdentity.namespace()).writeUUID(channelIdentity.uniqueId());
+        writeCustom(out);
     }
 
     @Override
-    public void read(ByteBuffer in)
-    {
-        try {
-            var packetClass = Class.forName(in.readString());
-            this.packet = (PacketBase) Allocator.unsafeAllocation(packetClass);
-
-            if (packet == null) {
-                Packery.log(Level.SEVERE, this.getClass(), "Packet cannot be allocated");
-                return;
-            }
-
-            this.packet.read(in);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public void read(ByteBuffer in) {
+        this.channelIdentity = new ChannelIdentity(in.readString(), in.readUUID());
+        readCustom(in);
     }
 
+    public abstract void writeCustom(ByteBuffer byteBuffer);
+
+    public abstract void readCustom(ByteBuffer byteBuffer);
 }

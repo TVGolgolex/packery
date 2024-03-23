@@ -26,7 +26,7 @@ package de.pascxl.packery.network;
 
 import de.golgolex.quala.utils.executors.ExecutionUtils;
 import de.pascxl.packery.Packery;
-import de.pascxl.packery.packet.PacketBase;
+import de.pascxl.packery.packet.NettyPacket;
 import de.pascxl.packery.packet.sender.PacketSender;
 import io.netty5.channel.Channel;
 import lombok.Getter;
@@ -47,7 +47,7 @@ public class NettyTransmitter extends PacketSender {
     }
 
     @Override
-    public <P extends PacketBase> void writePacket(P packet)
+    public <P extends NettyPacket> void writePacket(P packet)
     {
         if (!(channel != null && channel.isOpen())) {
             Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
@@ -69,7 +69,7 @@ public class NettyTransmitter extends PacketSender {
     }
 
     @Override
-    public <P extends PacketBase> void sendPacketAsync(P packet) {
+    public <P extends NettyPacket> void sendPacketAsync(P packet) {
         if (!(channel != null && channel.isOpen())) {
             Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;
@@ -81,7 +81,7 @@ public class NettyTransmitter extends PacketSender {
     }
 
     @Override
-    public <P extends PacketBase> void sendPacket(P packet) {
+    public <P extends NettyPacket> void sendPacket(P packet) {
         if (!(channel != null && channel.isOpen())) {
             Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;
@@ -91,7 +91,7 @@ public class NettyTransmitter extends PacketSender {
     }
 
     @Override
-    public <P extends PacketBase> void sendPacketSync(P packet) {
+    public <P extends NettyPacket> void sendPacketSync(P packet) {
         if (!(channel != null && channel.isOpen())) {
             Packery.log(Level.SEVERE, this.getClass(), "Channel is as null or as not open marked");
             return;

@@ -20,6 +20,8 @@ import de.pascxl.packery.Packery;
 import de.pascxl.packery.client.NettyClient;
 import de.pascxl.packery.network.ChannelIdentity;
 import de.pascxl.packery.network.InactiveAction;
+import de.pascxl.packery.utils.BypassCheck;
+import de.pascxl.test.live.packet.TestNettyPacket;
 import de.pascxl.test.live.packet.TestPacketListener;
 
 import java.util.UUID;
@@ -37,8 +39,8 @@ public class LiveClientTwo {
             return;
         }
 
-        nettyClient.packetManager().allowPacket(774090777346262697L);
-        nettyClient.packetManager().registerPacketHandler(2, TestPacketListener.class);
+        nettyClient.packetManager().allowPacket(BypassCheck.class);
+        nettyClient.packetManager().registerPacketHandler(TestNettyPacket.class.getName(), TestPacketListener.class);
 
     }
 }
